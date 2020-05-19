@@ -29,6 +29,7 @@
 #include "STD_TYPES.h"
 #include "Constants.h"
 #include "PWM.h"
+#include "imu6050.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -145,6 +146,7 @@ void YawCONTROLLER(void *argument);
 void Altitude(void *argument);
 void lateral(void *argument);
 void string_receive(s8 buffer[]);
+void fview(float argument);
 /* USER CODE BEGIN PFP */
 void vInitPARAMETERS(parameters *ptr);
 /* USER CODE END PFP */
@@ -502,6 +504,14 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void fview(float argument)
+{
+	uint8_t buffer[20];
+	float x = argument *100;
+	float y = abs(x)%100;
+	sprintf((char*)buffer,"phi = %d.%02u\t", x/100,y);
+	HAL_UART_Transmit(&huart1, buffer, strlen((char*)buffer), HAL_MAX_DELAY);
+}
 void string_receive(s8* buffer)
 {
 	int i = 0;
@@ -629,38 +639,13 @@ void MPU(void *argument)
 
 		Read_Accel_Values(ptr);
 
-		/*tickzayat = osKernelGetTickCount() - tickzayat;
-		sprintf(buffer,"zayat = %d\n", tickzayat);
-		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-
-		tickzayat = osKernelGetTickCount();*/
-
 		Read_Gyro_Values(ptr,INTEGRAL_DT);
-
-		/*tickzayat = osKernelGetTickCount() - tickzayat;
-		sprintf(buffer,"zayat = %d\n", tickzayat);
-		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-
-		tickzayat = osKernelGetTickCount();*/
 
 		imu_Comp_Filter(ptr,INTEGRAL_DT);
 
-		/*tickzayat = osKernelGetTickCount() - tickzayat;
-		sprintf(buffer,"zayat = %d\n", tickzayat);
-		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);*/
-
-		x = ptr->phi *100;
-		y = abs(x)%100;
-		sprintf(buffer,"phi = %d.%02u\t", x/100,y);
-		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-		x = ptr->theta *100;
-		y = abs(x)%100;
-		sprintf(buffer,"theta = %d.%02u\t", x/100,y);
-		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-		x = ptr->psi *100;
-		y = abs(x)%100;
-		sprintf(buffer,"psi = %d.%02u\n", x/100,y);
-		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+		fview(ptr->phi);
+		fview(ptr->theta);
+		fview(ptr->psi);
 		osDelay(3);
   }
   /* USER CODE END MPU */
