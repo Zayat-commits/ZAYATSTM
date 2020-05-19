@@ -618,10 +618,50 @@ void DroneStart(void *argument)
 void MPU(void *argument)
 {
   /* USER CODE BEGIN MPU */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
+	parameters *ptr = argument;
+	  	s8 buffer[20];
+	  	s32 x; u32 y;
+	  	u32 tickzayat;
+	  /* Infinite loop */
+	  for(;;)
+	  {
+		tickzayat = osKernelGetTickCount();
+
+		Read_Accel_Values(ptr);
+
+		/*tickzayat = osKernelGetTickCount() - tickzayat;
+		sprintf(buffer,"zayat = %d\n", tickzayat);
+		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+
+		tickzayat = osKernelGetTickCount();*/
+
+		Read_Gyro_Values(ptr,INTEGRAL_DT);
+
+		/*tickzayat = osKernelGetTickCount() - tickzayat;
+		sprintf(buffer,"zayat = %d\n", tickzayat);
+		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+
+		tickzayat = osKernelGetTickCount();*/
+
+		imu_Comp_Filter(ptr,INTEGRAL_DT);
+
+		/*tickzayat = osKernelGetTickCount() - tickzayat;
+		sprintf(buffer,"zayat = %d\n", tickzayat);
+		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);*/
+
+		x = ptr->phi *100;
+		y = abs(x)%100;
+		sprintf(buffer,"phi = %d.%02u\t", x/100,y);
+		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+		x = ptr->theta *100;
+		y = abs(x)%100;
+		sprintf(buffer,"theta = %d.%02u\t", x/100,y);
+		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+		x = ptr->psi *100;
+		y = abs(x)%100;
+		sprintf(buffer,"psi = %d.%02u\n", x/100,y);
+		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+		osDelay(3);
   }
   /* USER CODE END MPU */
 }
