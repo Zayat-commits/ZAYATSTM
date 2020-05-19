@@ -24,6 +24,8 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "STD_TYPES.h"
@@ -145,7 +147,7 @@ void RollPitch(void *argument);
 void YawCONTROLLER(void *argument);
 void Altitude(void *argument);
 void lateral(void *argument);
-void string_receive(s8 buffer[]);
+void string_receive(uint8_t buffer[]);
 void fview(float argument);
 /* USER CODE BEGIN PFP */
 void vInitPARAMETERS(parameters *ptr);
@@ -506,20 +508,20 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void fview(float argument)
 {
-	uint8_t buffer[20];
-	float x = argument *100;
-	float y = abs(x)%100;
+	uint8_t buffer[25];
+	int16_t x = argument *100;
+	uint16_t y = (x)%100;
 	sprintf((char*)buffer,"phi = %d.%02u\t", x/100,y);
-	HAL_UART_Transmit(&huart1, buffer, strlen((char*)buffer), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
 }
-void string_receive(s8* buffer)
+void string_receive(uint8_t* buffer)
 {
 	int i = 0;
-	HAL_UART_Receive(&huart1, &buffer[i], 1, HAL_MAX_DELAY);
+	HAL_UART_Receive(&huart1, (uint8_t*)&buffer[i], 1, HAL_MAX_DELAY);
 	while(buffer[i]!='#')
 	{
 		i++;
-		HAL_UART_Receive(&huart1, &buffer[i], 1, HAL_MAX_DELAY);
+		HAL_UART_Receive(&huart1, (uint8_t*)&buffer[i], 1, HAL_MAX_DELAY);
 	}
 	buffer[i] = '\0';
 }
@@ -591,9 +593,9 @@ void DroneStart(void *argument)
   /* USER CODE BEGIN DroneStart */
 
 	/*TO CALIBRATE DRONE MOTOR OR START*/
-	u8 buffer[20] = {"Calibrate = 0#\nDirect Start = 1#\n"};
-	HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-	HAL_UART_Receive(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+	u8 buffer[25] = {"Calibrate = 0#\nDirect Start = 1#\n"};
+	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
+	HAL_UART_Receive(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
 
   /* Infinite loop */
   for(;;)
@@ -629,7 +631,7 @@ void MPU(void *argument)
 {
   /* USER CODE BEGIN MPU */
 	parameters *ptr = argument;
-	  	s8 buffer[20];
+	  	uint8_t buffer[25];
 	  	s32 x; u32 y;
 	  	u32 tickzayat;
 	  /* Infinite loop */
@@ -661,7 +663,7 @@ void MPU(void *argument)
 void PrintPARAMS(void *argument)
 {
   /* USER CODE BEGIN PrintPARAMS */
-	s8 buffer[20];
+	uint8_t buffer[25];
 	parameters *ptr = argument;
   /* Infinite loop */
   for(;;)
@@ -670,49 +672,18 @@ void PrintPARAMS(void *argument)
 		/*TO READ FORCE VALS IN WORLD FRAME*/
 		/***********************************/
 
-sprintf(buffer, "Value of F1 = %f\t", ptr->cmd_thrust[0]);
-HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+sprintf((char*)buffer, "Value of F1 = %f\t", ptr->cmd_thrust[0]);
+HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
 
-sprintf(buffer, "Value of F2 = %f\t", ptr->cmd_thrust[1]);
-HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+sprintf((char*)buffer, "Value of F2 = %f\t", ptr->cmd_thrust[1]);
+HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
 
-sprintf(buffer, "Value of F3 = %f\n", ptr->cmd_thrust[2]);
-HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+sprintf((char*)buffer, "Value of F3 = %f\n", ptr->cmd_thrust[2]);
+HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
 
-sprintf(buffer, "Value of F4 = %f\n", ptr->cmd_thrust[3]);
-HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+sprintf((char*)buffer, "Value of F4 = %f\n", ptr->cmd_thrust[3]);
+HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
 
-/***********************************/
-/*TO READ IMU ANGLES IN WORLD FRAME*/
-/***********************************/
-
-//		dtostrf( ptr->phi, 7, 5, float_ );
-//		sprintf(buffer, "Value of phi = %s\t", float_);
-//		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-//
-//		dtostrf( ptr->theta, 7, 5, float_ );
-//		sprintf(buffer, "Value of theta = %s\t", float_);
-//		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-//
-//		dtostrf( ptr->psi, 7, 5, float_ );
-//		sprintf(buffer, "Value of psi = %s\n", float_);
-//		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-
-/***********************************/
-/*TO READ IMU ACCELS IN WORLD FRAME*/
-/***********************************/
-
-//		dtostrf( ptr->x_dot_dot, 7, 5, float_ );
-//		sprintf(buffer, "Value of xdotdot = %s\t", float_);
-//		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-//
-//		dtostrf( ptr->y_dot_dot, 7, 5, float_ );
-//		sprintf(buffer, "Value of ydotdot = %s\t", float_);
-//		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-//
-//		dtostrf( ptr->z_dot_dot, 7, 5, float_ );
-//		sprintf(buffer, "Value of zdotdot = %s\n", float_);
-//		HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
 	osDelay(40);
   }
   /* USER CODE END PrintPARAMS */
@@ -729,27 +700,27 @@ void insertPARAMS(void *argument)
 {
   /* USER CODE BEGIN insertPARAMS */
 	parameters *ptr = argument;
-	s8 buffer[20];
-	s8 ok[] = {"ok"};
+	uint8_t buffer[25];
+	uint8_t ok[] = {"OK"};
   /* Infinite loop */
   for(;;)
   {
 		/*TO INSERT X Y Z TARGET TO PID BLK*/
-	strcpy(buffer, "Insert x\n");
-	HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-	string_receive(buffer);
+	strcpy((char*)buffer, "Insert x\n");
+	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
+	string_receive((s8*)buffer);
 	HAL_UART_Transmit(&huart1, ok, strlen(ok), HAL_MAX_DELAY);
 
-	ptr->x_cmd = atoi(buffer);
-	strcpy(buffer, "Insert x dot\n");
-	HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-	string_receive(buffer);
+	ptr->x_cmd = atoi((char*)buffer);
+	strcpy((char*)buffer, "Insert x dot\n");
+	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
+	string_receive((s8*)buffer);
 	HAL_UART_Transmit(&huart1, ok, strlen(ok), HAL_MAX_DELAY);
 
-	ptr->x_dot_cmd = atoi(buffer);
-	strcpy(buffer, "Insert y\n");
-	HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
-	string_receive(buffer);
+	ptr->x_dot_cmd = atoi((char*)buffer);
+	strcpy((char*)buffer, "Insert y\n");
+	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
+	string_receive((s8*)buffer);
 	HAL_UART_Transmit(&huart1, ok, strlen(ok), HAL_MAX_DELAY);
 
 	ptr->y_cmd = atoi(buffer);
