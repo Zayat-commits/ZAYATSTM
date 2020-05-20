@@ -150,6 +150,8 @@ void Altitude(void *argument);
 void lateral(void *argument);
 
 /* USER CODE BEGIN PFP */
+void fview(uint8_t type, float argument, char * line);
+void string_receive(char* buffer);
 void vInitPARAMETERS(parameters *ptr);
 /* USER CODE END PFP */
 
