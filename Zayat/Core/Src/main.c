@@ -666,9 +666,9 @@ void MPU(void *argument)
 		imu_Comp_Filter(ptr,INTEGRAL_DT);
 
 		/*Template of function fview()-> fview(PRINT_TYPE, VARIABLE, STATEMENT)*/
-		fview(PRINT_FLOAT_NO_TAB, ptr->phi, "Value of phi = \r\n");
-		fview(PRINT_FLOAT_NO_TAB, ptr->theta, "Value of theta = \r\n");
-		fview(PRINT_FLOAT_WITH_TAB, ptr->psi, "Value of psi = \r\n");
+		fview(PRINT_FLOAT_WITH_TAB, ptr->phi, "Value of phi = \r\n");
+		fview(PRINT_FLOAT_WITH_TAB, ptr->theta, "Value of theta = \r\n");
+		fview(PRINT_FLOAT_NO_TAB, ptr->psi, "Value of psi = \r\n");
 
 		/*Calculate total ticks needed for 10 ms period*/
 		tickzayat = osKernelGetTickCount() - tickzayat;
@@ -700,10 +700,10 @@ void PrintPARAMS(void *argument)
 		/*TO READ FORCE VALS IN WORLD FRAME*/
 		/***********************************/
 
-	  fview(PRINT_FLOAT_NO_TAB, ptr->cmd_thrust[0], "Value of F1 = ");
-	  fview(PRINT_FLOAT_NO_TAB, ptr->cmd_thrust[1], "Value of F2 = ");
-	  fview(PRINT_FLOAT_NO_TAB, ptr->cmd_thrust[2], "Value of F3 = ");
-	  fview(PRINT_FLOAT_WITH_TAB, ptr->cmd_thrust[3], "Value of F4 = ");
+	  fview(PRINT_FLOAT_WITH_TAB, ptr->cmd_thrust[0], "Value of F1 = ");
+	  fview(PRINT_FLOAT_WITH_TAB, ptr->cmd_thrust[1], "Value of F2 = ");
+	  fview(PRINT_FLOAT_WITH_TAB, ptr->cmd_thrust[2], "Value of F3 = ");
+	  fview(PRINT_FLOAT_NO_TAB, ptr->cmd_thrust[3], "Value of F4 = ");
 
 	osDelay(20);
   }
