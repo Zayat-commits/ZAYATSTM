@@ -84,6 +84,7 @@ void ARM_Motors(void)
 void PWM(u16 dutyCycle, u8 motorNumber)
 {
 	u16 temp = dutyCycle * ONE_MS / 100 + ONE_MS;
+	sConfigOCZayat.Pulse = temp;
 
 	switch(motorNumber)
 	{
@@ -130,8 +131,7 @@ void DISARM_Motors(void)
 }
 void vCalibrate_Motors(void)
 {
-	s8 temp[20];
-	s8 buffer[20];
+	char buffer[50];
 	ARM_Motors();
 
 	PWM(MAX,1);
@@ -140,29 +140,29 @@ void vCalibrate_Motors(void)
 	PWM(MAX,4);
 
 	strcpy(buffer, "Enter 0 again after First beep-beep\n");
-	HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
 	string_receive(buffer);
 
 	while(atoi(buffer)!= 0);
 
 	strcpy(buffer, "Received\n");
-	HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
 	PWM(MIN,1);
 	PWM(MIN,2);
 	PWM(MIN,3);
 	PWM(MIN,4);
 
 	strcpy(buffer, "Enter 0 again after Second beep-beep\n");
-	HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
 	string_receive(buffer);
 
 	while(atoi(buffer)!= 0);
 
 	strcpy(buffer, "Received\n");
-	HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
 
 	ARM_Motors();
 
 	strcpy(buffer, "Duty Cycle  = 20%\n");
-	HAL_UART_Transmit(&huart1, buffer, strlen(buffer), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
 }

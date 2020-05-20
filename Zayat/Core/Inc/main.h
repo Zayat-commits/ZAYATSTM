@@ -32,7 +32,14 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include "STD_TYPES.h"
+#include "Constants.h"
+#include "PWM.h"
+#include "imu6050.h"
+#include "Blocks.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
