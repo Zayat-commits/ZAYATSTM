@@ -41,6 +41,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define PRINT_FLOAT_NO_TAB		0
+#define PRINT_FLOAT_WITH_TAB	1
+#define PRINT_INT_WITH_TAB		2
+#define PRINT_INT_NO_TAB		3
+#define PRINT_NROMAL			4
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -147,8 +152,8 @@ void RollPitch(void *argument);
 void YawCONTROLLER(void *argument);
 void Altitude(void *argument);
 void lateral(void *argument);
-void string_receive(uint8_t buffer[]);
-void fview(float argument);
+void string_receive(char buffer[]);
+void fview(uint8_t type, float argument, char * line);
 /* USER CODE BEGIN PFP */
 void vInitPARAMETERS(parameters *ptr);
 /* USER CODE END PFP */
@@ -193,7 +198,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -229,22 +234,22 @@ HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   PRINT_TTLHandle = osThreadNew(PrintPARAMS, (void*) p, &PRINT_TTL_attributes);
 
   /* creation of INSERT_PARAMETE */
-  INSERT_PARAMETEHandle = osThreadNew(insertPARAMS, (void*) p, &INSERT_PARAMETE_attributes);
+  //INSERT_PARAMETEHandle = osThreadNew(insertPARAMS, (void*) p, &INSERT_PARAMETE_attributes);
 
   /* creation of OUTPUT_THRUST */
   OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
 
   /* creation of ROLL_PITCH */
-  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
+  //ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
 
   /* creation of YAW */
   YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
 
   /* creation of ALTITUDE_CONTRO */
-  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
+  //ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
 
   /* creation of LATERAL_CONTROL */
-  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+ // LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -506,18 +511,32 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void fview(float argument)
+void fview(uint8_t type, float argument, char * line)
 {
 	uint8_t buffer[25];
-	int16_t x = argument *100;
-	uint16_t y = (x)%100;
-	sprintf((char*)buffer,"phi = %d.%02u\t", x/100,y);
-	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
+	if(type == PRINT_FLOAT_NO_TAB || type == PRINT_FLOAT_WITH_TAB)						//0 for printing variables, else for simple print
+	{
+		int32_t x = argument *100;
+		x = abs(x);
+		uint32_t y = x%100;
+		(type == PRINT_FLOAT_NO_TAB)? strcat(line, "%02d.%02u\r\n") : strcat(line, "%02d.%02u\t");
+		sprintf((char*)buffer,line, x/100,y);
+	}
+	else if(type == PRINT_INT_NO_TAB || type == PRINT_INT_WITH_TAB)
+	{
+		(type == PRINT_INT_NO_TAB)? strcat(line, "%d\r\n") : strcat(line, "%d\t");
+		sprintf((char*)buffer, line, (uint32_t)argument);
+	}
+	else
+	{
+		sprintf((char*)buffer,line);
+	}
+	HAL_UART_Transmit(&huart1, buffer, strlen((char*)buffer), HAL_MAX_DELAY);
 }
-void string_receive(uint8_t* buffer)
+void string_receive(char* buffer)
 {
 	int i = 0;
-	HAL_UART_Receive(&huart1, (uint8_t*)&buffer[i], 1, HAL_MAX_DELAY);
+	HAL_UART_Receive(&huart1, (uint16_t*)&buffer[i], 1, HAL_MAX_DELAY);
 	while(buffer[i]!='#')
 	{
 		i++;
@@ -576,7 +595,7 @@ void BodyRate(void *argument)
 		ptr->u3 = Iyy * ptr->q_dot;
 		ptr->u4 = Izz * ptr->r_dot;
 
-		osDelay(20);
+		osDelay(10);
   }
   /* USER CODE END 5 */ 
 }
@@ -591,15 +610,20 @@ void BodyRate(void *argument)
 void DroneStart(void *argument)
 {
   /* USER CODE BEGIN DroneStart */
-
+	parameters* ptr = argument;
 	/*TO CALIBRATE DRONE MOTOR OR START*/
-	u8 buffer[25] = {"Calibrate = 0#\nDirect Start = 1#\n"};
-	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
-	HAL_UART_Receive(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
+	//u8 buffer[25] = {"Calibrate = 0#\nDirect Start = 1#\n"};
+	fview(PRINT_NORMAL, 0, "Insert Psi Commanded: ");
+	string_receive(buffer);
+	ptr->psi_cmd = atoi(buffer)/1.0f;
 
   /* Infinite loop */
-  for(;;)
-  {/*
+	for(;;)
+	{
+	string_receive(buffer);
+	ptr->psi_cmd = atoi(buffer)/1.0f;
+
+	  /*
 	switch (atoi(buffer))
 		{
 	case 0:
@@ -615,7 +639,8 @@ void DroneStart(void *argument)
 		}
 	vTaskDelete(NULL);
 	*/
-    osDelay(1);
+
+	osDelay(30000);
   }
   /* USER CODE END DroneStart */
 }
@@ -631,24 +656,28 @@ void MPU(void *argument)
 {
   /* USER CODE BEGIN MPU */
 	parameters *ptr = argument;
-	  	uint8_t buffer[25];
-	  	s32 x; u32 y;
-	  	u32 tickzayat;
+	u32 tickzayat;
 	  /* Infinite loop */
 	  for(;;)
 	  {
 		tickzayat = osKernelGetTickCount();
-
+		/*Read Gyro and Accel values, then comp filter*/
 		Read_Accel_Values(ptr);
-
 		Read_Gyro_Values(ptr,INTEGRAL_DT);
-
 		imu_Comp_Filter(ptr,INTEGRAL_DT);
 
-		fview(ptr->phi);
-		fview(ptr->theta);
-		fview(ptr->psi);
-		osDelay(3);
+		/*Template of function fview()-> fview(PRINT_TYPE, VARIABLE, STATEMENT)*/
+		fview(PRINT_FLOAT_NO_TAB, ptr->phi, "Value of phi = \r\n");
+		fview(PRINT_FLOAT_NO_TAB, ptr->theta, "Value of theta = \r\n");
+		fview(PRINT_FLOAT_WITH_TAB, ptr->psi, "Value of psi = \r\n");
+
+		/*Calculate total ticks needed for 10 ms period*/
+		tickzayat = osKernelGetTickCount() - tickzayat;
+		tickzayat = 10 - tickzayat;
+		if(tickzayat < 0)Error_Handler();
+		tickzayat = osKernelGetTickCount() + tickzayat;
+
+		osDelayUntil(tickzayat);
   }
   /* USER CODE END MPU */
 }
@@ -672,19 +701,12 @@ void PrintPARAMS(void *argument)
 		/*TO READ FORCE VALS IN WORLD FRAME*/
 		/***********************************/
 
-sprintf((char*)buffer, "Value of F1 = %f\t", ptr->cmd_thrust[0]);
-HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
+	  fview(PRINT_FLOAT_NO_TAB, ptr->cmd_thrust[0], "Value of F1 = ");
+	  fview(PRINT_FLOAT_NO_TAB, ptr->cmd_thrust[1], "Value of F2 = ");
+	  fview(PRINT_FLOAT_NO_TAB, ptr->cmd_thrust[2], "Value of F3 = ");
+	  fview(PRINT_FLOAT_WITH_TAB, ptr->cmd_thrust[3], "Value of F4 = ");
 
-sprintf((char*)buffer, "Value of F2 = %f\t", ptr->cmd_thrust[1]);
-HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
-
-sprintf((char*)buffer, "Value of F3 = %f\n", ptr->cmd_thrust[2]);
-HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
-
-sprintf((char*)buffer, "Value of F4 = %f\n", ptr->cmd_thrust[3]);
-HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
-
-	osDelay(40);
+	osDelay(20);
   }
   /* USER CODE END PrintPARAMS */
 }
@@ -782,16 +804,16 @@ void outputTHRUST(void *argument)
 	/*************/
 	/*PWM MAPPING*/
 	/*************/
-	u8 i;
-	u16 speed_pwm[4];
-	for(i=0 ; i<4;i++)
-	{
-		if (ptr->cmd_thrust[i] < F_min) ptr->cmd_thrust[i]=F_min;
-		if (ptr->cmd_thrust[i] > F_max) ptr->cmd_thrust[i]=F_max;
-		speed_pwm[i] = (1/(F_max-F_min))*ptr->cmd_thrust[i]*500.0;
-		PWM(speed_pwm[i],i+1);
-	}
-    osDelay(20);
+//	u8 i;
+//	u16 speed_pwm[4];
+//	for(i=0 ; i<4;i++)
+//	{
+//		if (ptr->cmd_thrust[i] < F_min) ptr->cmd_thrust[i]=F_min;
+//		if (ptr->cmd_thrust[i] > F_max) ptr->cmd_thrust[i]=F_max;
+//		speed_pwm[i] = (1/(F_max-F_min))*ptr->cmd_thrust[i]*500.0;
+//		PWM(speed_pwm[i],i+1);
+//	}
+    osDelay(10);
   }
   /* USER CODE END outputTHRUST */
 }
@@ -848,7 +870,7 @@ void YawCONTROLLER(void *argument)
   {
 	ptr->r_cmd = kp_yaw*(ptr->psi_cmd - ptr->psi);
 
-	osDelay(20);
+	osDelay(10);
   }
   /* USER CODE END YawCONTROLLER */
 }
