@@ -517,15 +517,14 @@ void fview(uint8_t type, float argument, char * line)
 	if(type == PRINT_FLOAT_NO_TAB || type == PRINT_FLOAT_WITH_TAB)						//0 for printing variables, else for simple print
 	{
 		int32_t x = argument *100;
-		x = abs(x);
-		uint32_t y = x%100;
+		uint32_t y = abs(x%100);
 		(type == PRINT_FLOAT_NO_TAB)? strcat(line, "%02d.%02u\r\n") : strcat(line, "%02d.%02u\t");
 		sprintf((char*)buffer,line, x/100,y);
 	}
 	else if(type == PRINT_INT_NO_TAB || type == PRINT_INT_WITH_TAB)
 	{
 		(type == PRINT_INT_NO_TAB)? strcat(line, "%d\r\n") : strcat(line, "%d\t");
-		sprintf((char*)buffer, line, (uint32_t)argument);
+		sprintf((char*)buffer, line, (int32_t)argument);
 	}
 	else
 	{
