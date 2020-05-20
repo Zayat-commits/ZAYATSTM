@@ -17,15 +17,11 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
-//fkuu2
 
-//ramadan kareem no
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "STD_TYPES.h"
@@ -45,7 +41,7 @@
 #define PRINT_FLOAT_WITH_TAB	1
 #define PRINT_INT_WITH_TAB		2
 #define PRINT_INT_NO_TAB		3
-#define PRINT_NROMAL			4
+#define PRINT_NORMAL			4
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -152,8 +148,7 @@ void RollPitch(void *argument);
 void YawCONTROLLER(void *argument);
 void Altitude(void *argument);
 void lateral(void *argument);
-void string_receive(char buffer[]);
-void fview(uint8_t type, float argument, char * line);
+
 /* USER CODE BEGIN PFP */
 void vInitPARAMETERS(parameters *ptr);
 /* USER CODE END PFP */
@@ -181,7 +176,9 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  vInitPARAMETERS(&parameter);
+
+
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -198,6 +195,11 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  //vInitPARAMETERS(&parameter);
+
+  MPU_Init(p, INTEGRAL_DT);
+  Accel_calibration(p, INTEGRAL_DT);
+  Compass_Init();
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
@@ -222,34 +224,34 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of BODY_RATES */
-  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
+  //BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
 
   /* creation of DRONE_START */
-  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
+  //DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
 
   /* creation of IMU */
   IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
 
   /* creation of PRINT_TTL */
-  PRINT_TTLHandle = osThreadNew(PrintPARAMS, (void*) p, &PRINT_TTL_attributes);
+  //PRINT_TTLHandle = osThreadNew(PrintPARAMS, (void*) p, &PRINT_TTL_attributes);
 
   /* creation of INSERT_PARAMETE */
   //INSERT_PARAMETEHandle = osThreadNew(insertPARAMS, (void*) p, &INSERT_PARAMETE_attributes);
 
   /* creation of OUTPUT_THRUST */
-  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
+  //OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
 
   /* creation of ROLL_PITCH */
   //ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
 
   /* creation of YAW */
-  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
+  //YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
 
   /* creation of ALTITUDE_CONTRO */
   //ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
 
   /* creation of LATERAL_CONTROL */
- // LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+  //LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -274,7 +276,6 @@ int main(void)
   * @brief System Clock Configuration
   * @retval None
   */
-
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -518,12 +519,18 @@ void fview(uint8_t type, float argument, char * line)
 	{
 		int32_t x = argument *100;
 		uint32_t y = abs(x%100);
-		(type == PRINT_FLOAT_NO_TAB)? strcat(line, "%02d.%02u\r\n") : strcat(line, "%02d.%02u\t");
-		sprintf((char*)buffer,line, x/100,y);
+		if(argument < 0 && x/100 >= 0 && x/100 < 1 )
+		{
+			(type == PRINT_FLOAT_NO_TAB)? sprintf((char*)buffer, "%s-%d.%02u\r\n", line, x/100,y) : sprintf((char*)buffer, "%s-%d.%02u\t", line, x/100,y);
+		}
+		else
+		{
+			(type == PRINT_FLOAT_NO_TAB)? sprintf((char*)buffer, "%s%d.%02u\r\n", line, x/100,y) : sprintf((char*)buffer, "%s%d.%02u\t", line, x/100,y);
+		}
 	}
 	else if(type == PRINT_INT_NO_TAB || type == PRINT_INT_WITH_TAB)
 	{
-		(type == PRINT_INT_NO_TAB)? strcat(line, "%d\r\n") : strcat(line, "%d\t");
+		(type == PRINT_INT_NO_TAB)? sprintf((char*)buffer, "%s%d\r\n", line,argument) : sprintf((char*)buffer, "%s%d\t", line, argument);
 		sprintf((char*)buffer, line, (int32_t)argument);
 	}
 	else
@@ -611,16 +618,15 @@ void DroneStart(void *argument)
   /* USER CODE BEGIN DroneStart */
 	parameters* ptr = argument;
 	/*TO CALIBRATE DRONE MOTOR OR START*/
-	//u8 buffer[25] = {"Calibrate = 0#\nDirect Start = 1#\n"};
-	fview(PRINT_NORMAL, 0, "Insert Psi Commanded: ");
-	string_receive(buffer);
-	ptr->psi_cmd = atoi(buffer)/1.0f;
+	u8 buffer[25];
+
 
   /* Infinite loop */
 	for(;;)
 	{
-	string_receive(buffer);
-	ptr->psi_cmd = atoi(buffer)/1.0f;
+		fview(PRINT_NORMAL, 0, "Insert Psi Commanded: ");
+		string_receive(buffer);
+		ptr->psi_cmd = atoi(buffer)/1.0f;
 
 	  /*
 	switch (atoi(buffer))
@@ -656,6 +662,7 @@ void MPU(void *argument)
   /* USER CODE BEGIN MPU */
 	parameters *ptr = argument;
 	u32 tickzayat;
+	int adad=0;
 	  /* Infinite loop */
 	  for(;;)
 	  {
@@ -664,12 +671,15 @@ void MPU(void *argument)
 		Read_Accel_Values(ptr);
 		Read_Gyro_Values(ptr,INTEGRAL_DT);
 		imu_Comp_Filter(ptr,INTEGRAL_DT);
-
+	//	Read_Compass_Values(ptr);
 		/*Template of function fview()-> fview(PRINT_TYPE, VARIABLE, STATEMENT)*/
-		fview(PRINT_FLOAT_WITH_TAB, ptr->phi, "Value of phi = \r\n");
-		fview(PRINT_FLOAT_WITH_TAB, ptr->theta, "Value of theta = \r\n");
-		fview(PRINT_FLOAT_NO_TAB, ptr->psi, "Value of psi = \r\n");
-
+		if (adad ==10){
+		fview(PRINT_FLOAT_WITH_TAB, ptr->x, "Value of phi = ");
+		fview(PRINT_FLOAT_WITH_TAB, ptr->y, "Value of theta = ");
+		fview(PRINT_FLOAT_NO_TAB, ptr->z, "Value of psi = ");
+		adad=0;
+		}
+		adad++;
 		/*Calculate total ticks needed for 10 ms period*/
 		tickzayat = osKernelGetTickCount() - tickzayat;
 		tickzayat = 10 - tickzayat;
@@ -677,6 +687,7 @@ void MPU(void *argument)
 		tickzayat = osKernelGetTickCount() + tickzayat;
 
 		osDelayUntil(tickzayat);
+		//osDelay(100);
   }
   /* USER CODE END MPU */
 }
@@ -727,7 +738,7 @@ void insertPARAMS(void *argument)
   for(;;)
   {
 		/*TO INSERT X Y Z TARGET TO PID BLK*/
-	strcpy((char*)buffer, "Insert x\n");
+/*	strcpy((char*)buffer, "Insert x\n");
 	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen((char*)buffer), HAL_MAX_DELAY);
 	string_receive((s8*)buffer);
 	HAL_UART_Transmit(&huart1, ok, strlen(ok), HAL_MAX_DELAY);
@@ -768,7 +779,7 @@ void insertPARAMS(void *argument)
 	string_receive(buffer);
 	HAL_UART_Transmit(&huart1, ok, strlen(ok), HAL_MAX_DELAY);
 
-	ptr->psi_cmd = atoi(buffer);
+	ptr->psi_cmd = atoi(buffer);*/
 	osDelay(60000);
   }
   /* USER CODE END insertPARAMS */

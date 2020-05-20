@@ -12,7 +12,4 @@
 #define TERMS 7
 float power(float base, int exp);
 int fact(int n);
-float sine(f32 deg);
-float cosine(f32 deg);
-float arctan(f32 x);
 #endif /* QUICKMATH_H_ */

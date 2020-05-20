@@ -5,8 +5,8 @@ stm32f1xx_hal_uart.c:549:19:HAL_MultiProcessor_Init	24	static
 stm32f1xx_hal_uart.c:628:19:HAL_UART_DeInit	16	static
 stm32f1xx_hal_uart.c:672:13:HAL_UART_MspInit	16	static
 stm32f1xx_hal_uart.c:687:13:HAL_UART_MspDeInit	16	static
-stm32f1xx_hal_uart.c:1028:19:HAL_UART_Transmit	40	static
-stm32f1xx_hal_uart.c:1113:19:HAL_UART_Receive	40	static
+stm32f1xx_hal_uart.c:1027:19:HAL_UART_Transmit	40	static
+stm32f1xx_hal_uart.c:1112:19:HAL_UART_Receive	40	static
 stm32f1xx_hal_uart.c:1203:19:HAL_UART_Transmit_IT	24	static
 stm32f1xx_hal_uart.c:1248:19:HAL_UART_Receive_IT	24	static
 stm32f1xx_hal_uart.c:1299:19:HAL_UART_Transmit_DMA	32	static

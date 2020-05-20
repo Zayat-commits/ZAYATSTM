@@ -27,7 +27,7 @@ typedef struct parameters{
 	f32 x_dot, y_dot, z_dot;
 	f32 x_dot_dot, y_dot_dot, z_dot_dot;
 	f32 phi, theta, psi;
-	f32 phib, thetab, psib;
+	f32 phib, thetab, psib ,psic;
 	f32 phi_dot, theta_dot, psi_dot;
 	f32 p, q, r;
 	f32 p_dot, q_dot, r_dot;

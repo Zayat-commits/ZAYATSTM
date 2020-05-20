@@ -1024,7 +1024,6 @@ HAL_StatusTypeDef HAL_UART_UnRegisterCallback(UART_HandleTypeDef *huart, HAL_UAR
   * @param  Timeout Timeout duration
   * @retval HAL status
   */
-
 HAL_StatusTypeDef HAL_UART_Transmit(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 {
   uint16_t *tmp;
@@ -1172,6 +1171,7 @@ HAL_StatusTypeDef HAL_UART_Receive(UART_HandleTypeDef *huart, uint8_t *pData, ui
         {
           *pData++ = (uint8_t)(huart->Instance->DR & (uint8_t)0x007F);
         }
+
       }
     }
 

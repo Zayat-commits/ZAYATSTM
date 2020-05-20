@@ -1,4 +1,4 @@
-/*
+ /*
  * imu6050.c
  *
  *  Created on: Oct 3, 2019
@@ -44,6 +44,7 @@ extern I2C_HandleTypeDef hi2c1;
 
 void MPU_Init(parameters *p, f32 RT)
 {
+	RT=0.01;
 	HAL_Delay(150);
 	buf[0]=SMPRLT_DIV;
 	buf[1]=0x00;
@@ -92,7 +93,7 @@ void MPU_Init(parameters *p, f32 RT)
 					p->r = temp3/1.0f;
 
 
-	for (u16 i=0 ; i<3000 ; i++)
+	for (u16 i=0 ; i<300 ; i++)
 	{
 		errorp= errorp + p->p;
 		errorq= errorq + p->q;
@@ -132,18 +133,18 @@ void MPU_Init(parameters *p, f32 RT)
 
 			HAL_Delay(3);
 	}
-	errorp=errorp/3000.0;
-	errorq=errorq/3000.0;
-	errorr=errorr/3000.0;
-	errorxbody= errorxbody /3000.0;
-	errorybody= errorybody /3000.0;
-	errorzbody= errorzbody /3000.0;
+	errorp=errorp/300.0;
+	errorq=errorq/300.0;
+	errorr=errorr/300.0;
+	errorxbody= errorxbody /300.0;
+	errorybody= errorybody /300.0;
+	errorzbody= errorzbody /300.0;
 
 
 }
 void Accel_calibration(parameters *p, f32 RT)
 {
-
+	RT=0.01;
 		f32 q[4], euler[3];
 		Read_Gyro_Values(p, RT);
 		Read_Accel_Values(p);
@@ -154,7 +155,7 @@ void Accel_calibration(parameters *p, f32 RT)
 		f32 acc[3] = {p->x_dot_dot, p->y_dot_dot, p->z_dot_dot};
 
 		Rotate_BtoW_acc(acc, q);
-		for (u16 i=0 ; i<3000 ; i++)
+		for (u16 i=0 ; i<300 ; i++)
 		{
 			errorx= errorx + acc[0];
 			errory= errory + acc[1];
@@ -171,25 +172,27 @@ void Accel_calibration(parameters *p, f32 RT)
 			Rotate_BtoW_acc(acc, q);
 				HAL_Delay(3);
 		}
-		errorx=errorx/3000.0;
-		errory=errory/3000.0;
-		errorz=errorz/3000.0;
+		errorx=errorx/300.0;
+		errory=errory/300.0;
+		errorz=errorz/300.0;
 
 }
 void Read_Accel_Values(parameters *p)
 {
 
 	buf[0]=ACCEL_XOUT_H;
-		HAL_I2C_Master_Transmit(&hi2c1, 0xD0, buf, 1, HAL_MAX_DELAY);
-
-		HAL_I2C_Master_Receive(&hi2c1, 0xD0, buf, 6, HAL_MAX_DELAY);
+		  HAL_I2C_Master_Transmit(&hi2c1, 0xD0, buf, 1, HAL_MAX_DELAY);
+		 HAL_I2C_Master_Receive(&hi2c1, 0xD0, buf, 6, HAL_MAX_DELAY);
 		int16_t temp1,temp2,temp3;
 		temp1 = ((int16_t)buf[0]<<8) | (buf[1]);
 		temp2 = ((int16_t)buf[2]<<8) | (buf[3]);
 		temp3 = ((int16_t)buf[4]<<8) | (buf[5]);
-	p->x_dot_dot = (temp1-errorxbody)/2048.0;
-	p->y_dot_dot = (temp2-errorybody)/2048.0;
-	p->z_dot_dot = (temp3-errorzbody)/2048.0;
+			p->x_dot_dot = (temp1-errorxbody)/2048.0;
+			p->y_dot_dot = (temp2-errorybody)/2048.0;
+			p->z_dot_dot = (temp3-errorzbody)/2048.0;
+//			p->x_dot_dot = (temp1)/2048.0f;
+//			p->y_dot_dot = (temp2)/2048.0f;
+//			p->z_dot_dot = (temp3)/2048.0f;
 
 }
 
@@ -269,7 +272,7 @@ void imu_Comp_Filter(parameters *p, f32 RT)
 	//Quaternion(q, euler);
 	//idk khaled told me to add them idk what they do but seems like they use rotated accel
 	f32 acc[3] = {p->x_dot_dot, p->y_dot_dot, p->z_dot_dot};
-	Rotate_BtoW_acc(acc, q); // there was a line to get q but i believe it's already there
+	Rotate_BtoW(acc, q); // there was a line to get q but i believe it's already there
 
 	acc[0] -= errorx;
 	acc[1]  -= errory;
@@ -313,9 +316,9 @@ void imu_Comp_Filter(parameters *p, f32 RT)
 		p->psi += 360;
 
 
-	p->x_dot_dot = acc[0];
-	p->y_dot_dot = acc[1];
-	p->z_dot_dot = acc[2];
+//	p->x_dot_dot = acc[0];
+//	p->y_dot_dot = acc[1];
+//	p->z_dot_dot = acc[2];
 
 
 }
