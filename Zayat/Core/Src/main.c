@@ -150,6 +150,7 @@ void lateral(void *argument);
 TIM_OC_InitTypeDef sConfigOCZayat = {0};
 parameters parameter;
 parameters* p = &parameter;
+
 /* USER CODE END 0 */
 
 /**

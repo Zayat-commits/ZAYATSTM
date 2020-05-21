@@ -49,7 +49,6 @@ vTaskDelete(NULL);
 void vdMPUBlock(parameters* ptr)
 {
 	uint8_t adad=0;
-
 	/*Read Gyro and Accel values, then comp filter*/
 	Read_Accel_Values(ptr);
 	Read_Gyro_Values(ptr,INTEGRAL_DT);
