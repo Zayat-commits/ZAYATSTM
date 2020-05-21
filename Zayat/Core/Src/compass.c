@@ -2,6 +2,10 @@
 
 #include "compass.h"
 
+
+
+
+
 f32 xMax, yMax, xMin, yMin,zMin, zMax;
 f32     Mag_x_offset,    Mag_y_offset ,   Mag_z_offset ;
 accel mag;
@@ -31,23 +35,23 @@ void Compass_Init()
 	HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 4, HAL_MAX_DELAY);
 
 
-//
-//
-//		buf[0]=0x03;
-//		HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 1, HAL_MAX_DELAY);
-//		HAL_I2C_Master_Receive(&hi2c1, 0x3C, buf, 6, HAL_MAX_DELAY);
-//
-//					temp1 = ((int16_t)buf[0]<<8) | (buf[1]);
-//					temp2 = ((int16_t)buf[2]<<8) | (buf[3]);
-//					temp3 = ((int16_t)buf[4]<<8) | (buf[5]);
-//
-//					mag->x = temp1/1.0f;
-//
-//					mag->z = temp2/1.0f;
-//
-//					mag->y = temp3/1.0f;
-//
-//
+
+
+		buf[0]=0x03;
+		HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 1, HAL_MAX_DELAY);
+		HAL_I2C_Master_Receive(&hi2c1, 0x3C, buf, 6, HAL_MAX_DELAY);
+
+					temp1 = ((int16_t)buf[0]<<8) | (buf[1]);
+					temp2 = ((int16_t)buf[2]<<8) | (buf[3]);
+					temp3 = ((int16_t)buf[4]<<8) | (buf[5]);
+
+					mag.x = temp1/1.0f;
+
+					mag.z = temp2/1.0f;
+
+					mag.y = temp3/1.0f;
+
+
 //
 //	for (u16 i=0 ; i<12000 ; i++)
 //		{
@@ -67,16 +71,22 @@ void Compass_Init()
 //					temp2 = ((int16_t)buf[2]<<8) | (buf[3]);
 //					temp3 = ((int16_t)buf[4]<<8) | (buf[5]);
 //
-//					mag->x = temp1/1.0f;
+//					mag.x = temp1/1.0f;
 //
-//					mag->z = temp2/1.0f;
+//					mag.z = temp2/1.0f;
 //
-//					mag->y = temp3/1.0f;
+//					mag.y = temp3/1.0f;
 //
-//				HAL_Delay(10);
+//				HAL_Delay(5);
 //		}
+//	fview(PRINT_FLOAT_NO_TAB, xMax, "Value of xmx = ");
+//	fview(PRINT_FLOAT_NO_TAB, xMin, "Value of xmin = ");
+//	fview(PRINT_FLOAT_NO_TAB, yMax, "Value of ymax = ");
+//	fview(PRINT_FLOAT_NO_TAB, yMin, "Value of ymin = ");
+//	fview(PRINT_FLOAT_NO_TAB, zMax, "Value of zmax = ");
+//	fview(PRINT_FLOAT_NO_TAB, zMin, "Value of zmin = ");
 
-	xMax=  -171; xMin=340; yMax= -383; yMin=50; zMax= -256;zMin=255;
+	xMax=  -123; xMin=282; yMax= -246; yMin=245; zMax= -256;zMin=255;
 	Mag_x_offset= (xMax+xMin)/2.0;
 	Mag_y_offset= (yMax+yMin)/2.0;
 	Mag_z_offset= (zMax+zMin)/2.0;
@@ -109,15 +119,20 @@ void Read_Compass_Values(parameters *body)
 	mag.y -= ((yMax + yMin) / 2.0);
 	mag.z -= ((zMax + zMin) / 2.0);
 
-	f32 euler[3]={body->phib, body->thetab,body->psib};
-	f32 q[4];
-	Quaternion(q, euler);
-	f32 magz[3]={mag.x,mag.y,mag.z};
-	Rotate_BtoW(magz, q);
+//	f32 euler[3]={body->phib, body->thetab,body->psib};
+//	f32 q[4];
+//	Quaternion(q, euler);
+//	f32 magz[3]={mag.x,mag.y,mag.z};
+//	Rotate_BtoW(magz, q);
+//
+	f32 Mag_pitch =  body->phib* DEG_TO_RAD;
+	f32 Mag_roll = body->thetab * DEG_TO_RAD;
 
+	  // ----- Apply the standard tilt formulas
+	f32  Mag_x_hor = mag.x * cos(Mag_pitch) + mag.y * sin(Mag_roll) * sin(Mag_pitch) + mag.z * cos(Mag_roll) * sin(Mag_pitch);
+	 f32 Mag_y_hor = mag.y * cos(Mag_roll) - mag.z * sin(Mag_roll);
 
-
-	body->psic= atan2(magz[1],magz[0])*RAD_TO_DEG;
+	body->psic= atan2(Mag_y_hor,Mag_x_hor ) * RAD_TO_DEG;
 
 
 
