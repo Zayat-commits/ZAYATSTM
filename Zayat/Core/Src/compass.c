@@ -18,9 +18,9 @@ void Compass_Init()
 	HAL_Delay(150);
 
 
-	buf[0]=0x37; //Bypassing
-	buf[1]=0x02;
-	HAL_I2C_Master_Transmit(&hi2c1, 0b11010000, buf, 2, HAL_MAX_DELAY);
+//	buf[0]=0x37; //Bypassing
+//	buf[1]=0x02;
+//	HAL_I2C_Master_Transmit(&hi2c1, 0b11010000, buf, 2, HAL_MAX_DELAY);
 
 
 
@@ -31,25 +31,37 @@ void Compass_Init()
 	buf[1]=0x70;
 	buf[2]=0xA0;
 	buf[3]=0x00;
+	HAL_StatusTypeDef ret;
+	//ret=HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 4, HAL_MAX_DELAY);
+	ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
+	while(ret !=HAL_OK)
+	{
+		HAL_I2C_DeInit(&hi2c1);
+		//HAL_Delay(10);
+		HAL_I2C_Init(&hi2c1);
+		//HAL_Delay(10);
+		ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
+	}
 
-	HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 4, HAL_MAX_DELAY);
 
 
 
+HAL_Delay(100);
 
-		buf[0]=0x03;
-		HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 1, HAL_MAX_DELAY);
-		HAL_I2C_Master_Receive(&hi2c1, 0x3C, buf, 6, HAL_MAX_DELAY);
 
-					temp1 = ((int16_t)buf[0]<<8) | (buf[1]);
-					temp2 = ((int16_t)buf[2]<<8) | (buf[3]);
-					temp3 = ((int16_t)buf[4]<<8) | (buf[5]);
-
-					mag.x = temp1/1.0f;
-
-					mag.z = temp2/1.0f;
-
-					mag.y = temp3/1.0f;
+//		buf[0]=0x03;
+//		HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 1, HAL_MAX_DELAY);
+//		HAL_I2C_Master_Receive(&hi2c1, 0x3C, buf, 6, HAL_MAX_DELAY);
+//
+//					temp1 = ((int16_t)buf[0]<<8) | (buf[1]);
+//					temp2 = ((int16_t)buf[2]<<8) | (buf[3]);
+//					temp3 = ((int16_t)buf[4]<<8) | (buf[5]);
+//
+//					mag.x = temp1/1.0f;
+//
+//					mag.z = temp2/1.0f;
+//
+//					mag.y = temp3/1.0f;
 
 
 //
@@ -86,10 +98,7 @@ void Compass_Init()
 //	fview(PRINT_FLOAT_NO_TAB, zMax, "Value of zmax = ");
 //	fview(PRINT_FLOAT_NO_TAB, zMin, "Value of zmin = ");
 
-	xMax=  -123; xMin=282; yMax= -246; yMin=245; zMax= -256;zMin=255;
-	Mag_x_offset= (xMax+xMin)/2.0;
-	Mag_y_offset= (yMax+yMin)/2.0;
-	Mag_z_offset= (zMax+zMin)/2.0;
+	xMax=  -661; xMin=694; yMax= -207; yMin=876; zMax= -724;zMin=847;
 
 //send smth like DONE CALIB
 
@@ -98,11 +107,40 @@ void Compass_Init()
 
 void Read_Compass_Values(parameters *body)
 {
+HAL_StatusTypeDef ret;
+
+	buf[0]=3;
+	int counterzayat = 12;
+	ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
+	while(ret !=HAL_OK)
+	{
+		HAL_I2C_Master_Abort_IT(&hi2c1, 0x3C);
+		HAL_I2C_DeInit(&hi2c1);
+		HAL_I2C_Init(&hi2c1);
+		ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
+	}
+
+	ret=HAL_I2C_Master_Transmit_IT(&hi2c1, 0x3C, buf, 1);
+	ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
+	while(ret !=HAL_OK)
+	{
+		HAL_I2C_Master_Abort_IT(&hi2c1, 0x3C);
+		HAL_I2C_DeInit(&hi2c1);
+		HAL_I2C_Init(&hi2c1);
+		ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
+	}
 
 
-	buf[0]=0x03;
-	HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 1, HAL_MAX_DELAY);
-	HAL_I2C_Master_Receive(&hi2c1, 0x3C, buf, 6, HAL_MAX_DELAY);
+	ret=HAL_I2C_Master_Receive_IT(&hi2c1, 0x3C, buf, 6);
+	while(ret !=HAL_OK)
+	{
+		HAL_I2C_Master_Abort_IT(&hi2c1, 0x3C);
+		HAL_I2C_DeInit(&hi2c1);
+		HAL_I2C_Init(&hi2c1);
+		ret=HAL_I2C_Master_Receive(&hi2c1, 0x3C, buf, 6,HAL_MAX_DELAY);
+	}
+
+
 
 				temp1 = ((int16_t)buf[0]<<8) | (buf[1]);
 				temp2 = ((int16_t)buf[2]<<8) | (buf[3]);
@@ -115,58 +153,23 @@ void Read_Compass_Values(parameters *body)
 				mag.y = temp3/1.0f;
 
 
-	mag.x -= ((xMax + xMin) / 2.0);
-	mag.y -= ((yMax + yMin) / 2.0);
-	mag.z -= ((zMax + zMin) / 2.0);
+				mag.x -= ((xMax + xMin) / 2.0);
+				mag.y -= ((yMax + yMin) / 2.0);
+				mag.z -= ((zMax + zMin) / 2.0);
+				f32  Roll  = - body->phib*DEG_TO_RAD;
+				f32 Pitch = -body->thetab*DEG_TO_RAD;
 
-//	f32 euler[3]={body->phib, body->thetab,body->psib};
-//	f32 q[4];
-//	Quaternion(q, euler);
-//	f32 magz[3]={mag.x,mag.y,mag.z};
-//	Rotate_BtoW(magz, q);
-//
-	f32 Mag_pitch =  body->phib* DEG_TO_RAD;
-	f32 Mag_roll = body->thetab * DEG_TO_RAD;
-
-	  // ----- Apply the standard tilt formulas
-	f32  Mag_x_hor = mag.x * cos(Mag_pitch) + mag.y * sin(Mag_roll) * sin(Mag_pitch) + mag.z * cos(Mag_roll) * sin(Mag_pitch);
-	 f32 Mag_y_hor = mag.y * cos(Mag_roll) - mag.z * sin(Mag_roll);
-
-	body->psic= atan2(Mag_y_hor,Mag_x_hor ) * RAD_TO_DEG;
+			f32 Xh = mag.x * cos(Pitch) + mag.z * sin(Pitch);
+			f32 Yh = mag.x * sin(Roll) * sin(Pitch) + mag.y * cos(Roll) + mag.z * sin(Roll) * cos(Pitch);
 
 
 
+				body->psic= atan2(Xh,Yh) * RAD_TO_DEG;
 
 
-
-
-
-
-
-
-	//f32 Mag_roll= atan2(body->y_dot_dot,sqrt(body->x_dot_dot * body->x_dot_dot + body->z_dot_dot* body->z_dot_dot));
-	//f32 Mag_pitch=-atan2(-body->x_dot_dot, sqrt(body->y_dot_dot * body->y_dot_dot + body->z_dot_dot * body->z_dot_dot));
-	//f32 Mag_roll= body->phi;
-	//f32 Mag_pitch= body->theta;
-
-
-	//f32 Mag_x_hor = mag.y * sin(Mag_pitch)* sin(Mag_roll) +mag.x * cos(Mag_pitch) + mag.z * sin(Mag_pitch) * cos(Mag_roll);
-	// f32 Mag_y_hor = mag.y * cos(Mag_roll) - mag.z * sin(Mag_roll);
-
-
-	// body->psib = atan2( Mag_y_hor,Mag_x_hor) * RAD_TO_DEG;  // Magnetic North*/
-	//body->psib = 180*atan2(-Mag_y_hor,Mag_x_hor)/M_PI;
-
-
-
-
-
-
-
-
-	 body->psic += Declination;
-		if (body->psic>180)									/* Due to declination check for >360 degree */
-			body->psic = body->psic - 360;
-			if (body->psic<-180)										/* Check for sign */
-				body->psic = body->psic + 360;
+				 body->psic += Declination;
+					if (body->psic>180)									/* Due to declination check for >360 degree */
+						body->psic = body->psic - 360;
+						if (body->psic<-180)										/* Check for sign */
+							body->psic = body->psic + 360;
 }

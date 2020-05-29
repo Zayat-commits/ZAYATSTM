@@ -48,19 +48,19 @@ vTaskDelete(NULL);
 }
 void vdMPUBlock(parameters* ptr)
 {
-	uint8_t adad=0;
+	static uint8_t adad=0;
 	/*Read Gyro and Accel values, then comp filter*/
 	Read_Accel_Values(ptr);
 	Read_Gyro_Values(ptr,INTEGRAL_DT);
-	imu_Comp_Filter(ptr,INTEGRAL_DT);
-	//Read_Compass_Values(ptr);
+//	imu_Comp_Filter(ptr,INTEGRAL_DT);
+//	Read_Compass_Values(ptr);
 
 	/*Template of function fview()-> fview(PRINT_TYPE, VARIABLE, STATEMENT)*/
 	if (adad ==10)
 	{
-		fview(PRINT_FLOAT_WITH_TAB, ptr->x, "Value of phi = ");
-		fview(PRINT_FLOAT_WITH_TAB, ptr->y, "Value of theta = ");
-		fview(PRINT_FLOAT_NO_TAB, ptr->z, "Value of psi = ");
+		fview(PRINT_FLOAT_WITH_TAB, ptr->thetab, "Value of phi = ");
+		fview(PRINT_FLOAT_WITH_TAB, ptr->phib, "Value of theta = ");
+		fview(PRINT_FLOAT_NO_TAB, ptr->psic, "Value of psic = ");
 		adad=0;
 	}
 	adad++;

@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
+
 #include "main.h"
 #include "cmsis_os.h"
 
@@ -127,10 +128,10 @@ const osThreadAttr_t LATERAL_CONTROL_attributes = {
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_I2C1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_I2C1_Init(void);
 void BodyRate(void *argument);
 void DroneStart(void *argument);
 void MPU(void *argument);
@@ -170,8 +171,6 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
-
-
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -183,70 +182,70 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_I2C1_Init();
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   //vInitPARAMETERS(&parameter);
-
+  HAL_Delay(150);
   MPU_Init(p, INTEGRAL_DT);
   Accel_calibration(p, INTEGRAL_DT);
-  Compass_Init();
+//  Compass_Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
+//////  /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
+//////  /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
+//////  /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
+//////  /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of BODY_RATES */
-  //BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
-
-  /* creation of DRONE_START */
-  //DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
-
-  /* creation of IMU */
+//  /* creation of BODY_RATES */
+//  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
+//
+//  /* creation of DRONE_START */
+//  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
+//
+//  /* creation of IMU */
   IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
-
-  /* creation of PRINT_TTL */
-  //PRINT_TTLHandle = osThreadNew(PrintPARAMS, (void*) p, &PRINT_TTL_attributes);
-
-  /* creation of INSERT_PARAMETE */
-  //INSERT_PARAMETEHandle = osThreadNew(insertPARAMS, (void*) p, &INSERT_PARAMETE_attributes);
-
-  /* creation of OUTPUT_THRUST */
-  //OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
-
-  /* creation of ROLL_PITCH */
-  //ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
-
-  /* creation of YAW */
-  //YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
-
-  /* creation of ALTITUDE_CONTRO */
-  //ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
-
-  /* creation of LATERAL_CONTROL */
-  //LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
-
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+//
+//  /* creation of PRINT_TTL */
+//  PRINT_TTLHandle = osThreadNew(PrintPARAMS, (void*) p, &PRINT_TTL_attributes);
+//
+//  /* creation of INSERT_PARAMETE */
+//  INSERT_PARAMETEHandle = osThreadNew(insertPARAMS, (void*) p, &INSERT_PARAMETE_attributes);
+//
+//  /* creation of OUTPUT_THRUST */
+//  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
+//
+//  /* creation of ROLL_PITCH */
+//  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
+//
+//  /* creation of YAW */
+//  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
+//
+//  /* creation of ALTITUDE_CONTRO */
+//  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
+//
+//  /* creation of LATERAL_CONTROL */
+//  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+//
+//  /* USER CODE BEGIN RTOS_THREADS */
+//////////////  /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
@@ -260,6 +259,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  Read_Compass_Values(&parameter);
+		fview(PRINT_FLOAT_NO_TAB, parameter.psic, "Value of psic = ");
+
   }
   /* USER CODE END 3 */
 }
@@ -299,9 +301,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  /** Enables the Clock Security System 
-  */
-  HAL_RCC_EnableCSS();
 }
 
 /**
@@ -313,15 +312,14 @@ static void MX_I2C1_Init(void)
 {
 
   /* USER CODE BEGIN I2C1_Init 0 */
-
   /* USER CODE END I2C1_Init 0 */
 
   /* USER CODE BEGIN I2C1_Init 1 */
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 100000;
-  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c1.Init.ClockSpeed = 200000;
+  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_16_9;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -333,6 +331,7 @@ static void MX_I2C1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN I2C1_Init 2 */
+  __HAL_RCC_I2C1_CLK_ENABLE();
 
   /* USER CODE END I2C1_Init 2 */
 
@@ -501,9 +500,28 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
+   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
+
+   GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
+   GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+   GPIO_InitStruct.Pull = GPIO_PULLUP;
+   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
 }
 
 /* USER CODE BEGIN 4 */
+
+
+//GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
+//  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+//  GPIO_InitStruct.Pull = GPIO_PULLUP;
+//  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+//  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+//
+
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_BodyRate */
@@ -588,10 +606,9 @@ void DroneStart(void *argument)
 /* USER CODE END Header_MPU */
 void MPU(void *argument)
 {
-
   /* USER CODE BEGIN MPU */
   /* Infinite loop */
-	u32 tickzayat;
+	s32 tickzayat;
 	for(;;)
 	{
 		tickzayat = osKernelGetTickCount();
@@ -601,7 +618,7 @@ void MPU(void *argument)
 		/*Calculate total ticks needed for 10 ms period*/
 		tickzayat = osKernelGetTickCount() - tickzayat;
 		tickzayat = 10 - tickzayat;
-		if(tickzayat < 0)Error_Handler();
+		if(tickzayat < 0)tickzayat = 100;
 		tickzayat = osKernelGetTickCount() + tickzayat;
 		/*---------------------------------------------*/
 		osDelayUntil(tickzayat);
@@ -684,6 +701,7 @@ void RollPitch(void *argument)
   }
   /* USER CODE END RollPitch */
 }
+
 /* USER CODE BEGIN Header_YawCONTROLLER */
 /**
 * @brief Function implementing the YAW thread.
