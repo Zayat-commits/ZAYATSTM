@@ -132,37 +132,29 @@ void DISARM_Motors(void)
 void vCalibrate_Motors(void)
 {
 	char buffer[50];
-	ARM_Motors();
-
 	PWM(MAX,1);
 	PWM(MAX,2);
 	PWM(MAX,3);
 	PWM(MAX,4);
 
-	strcpy(buffer, "Enter 0 again after First beep-beep\n");
-	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
+	fview(PRINT_NORMAL, 0, "Enter 0 again after First beep-beep\n");
+
 	string_receive(buffer);
 
 	while(atoi(buffer)!= 0);
 
-	strcpy(buffer, "Received\n");
-	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
+	fview(PRINT_NORMAL, 0, "Received\n");
+
 	PWM(MIN,1);
 	PWM(MIN,2);
 	PWM(MIN,3);
 	PWM(MIN,4);
 
-	strcpy(buffer, "Enter 0 again after Second beep-beep\n");
-	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
+	fview(PRINT_NORMAL, 0, "Enter 0 again after First beep-beep\n");
+
 	string_receive(buffer);
 
 	while(atoi(buffer)!= 0);
 
-	strcpy(buffer, "Received\n");
-	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
-
-	ARM_Motors();
-
-	strcpy(buffer, "Duty Cycle  = 20%\n");
-	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
+	fview(PRINT_NORMAL, 0, "Received\n");
 }

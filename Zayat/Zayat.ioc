@@ -1,7 +1,7 @@
 #MicroXplorer Configuration settings - do not modify
 FREERTOS.FootprintOK=true
 FREERTOS.IPParameters=Tasks01,FootprintOK,configTOTAL_HEAP_SIZE
-FREERTOS.Tasks01=BODY_RATES,31,150,BodyRate,Default,p,Dynamic,NULL,NULL;DRONE_START,27,300,DroneStart,Default,p,Dynamic,NULL,NULL;IMU,34,300,MPU,Default,p,Dynamic,NULL,NULL;PRINT_TTL,28,300,PrintPARAMS,Default,p,Dynamic,NULL,NULL;INSERT_PARAMETE,40,300,insertPARAMS,Default,p,Dynamic,NULL,NULL;OUTPUT_THRUST,29,128,outputTHRUST,Default,p,Dynamic,NULL,NULL;ROLL_PITCH,31,300,RollPitch,Default,p,Dynamic,NULL,NULL;YAW,31,128,YawCONTROLLER,Default,p,Dynamic,NULL,NULL;ALTITUDE_CONTRO,32,128,Altitude,Default,p,Dynamic,NULL,NULL;LATERAL_CONTROL,8,129,lateral,Default,p,Dynamic,NULL,NULL
+FREERTOS.Tasks01=BODY_RATES,30,150,BodyRate,Default,p,Dynamic,NULL,NULL;DRONE_START,55,300,DroneStart,Default,p,Dynamic,NULL,NULL;IMU,34,300,MPU,Default,p,Dynamic,NULL,NULL;PRINT_TTL,28,300,PrintPARAMS,Default,p,Dynamic,NULL,NULL;OUTPUT_THRUST,29,128,outputTHRUST,Default,p,Dynamic,NULL,NULL;ROLL_PITCH,31,300,RollPitch,Default,p,Dynamic,NULL,NULL;YAW,32,128,YawCONTROLLER,Default,p,Dynamic,NULL,NULL;ALTITUDE_CONTRO,32,128,Altitude,Default,p,Dynamic,NULL,NULL;LATERAL_CONTROL,16,129,lateral,Default,p,Dynamic,NULL,NULL
 FREERTOS.configTOTAL_HEAP_SIZE=12000
 File.Version=6
 GPIO.groupedBy=Group By Peripherals

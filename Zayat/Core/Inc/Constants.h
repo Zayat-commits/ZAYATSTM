@@ -12,17 +12,17 @@
 #define Iyy			0.08
 #define Izz 		0.000638
 #define m			1.5
-#define kp_bank		10
+#define kp_bank		10.0
 #define g			9.812
-#define L  			1
+#define L  			1.0
 #define k_thrust	0.016
-#define kp_xy		32
-#define kd_xy		12
-#define	kp_z		32
-#define kd_z		12
-#define	kp_yaw		2
-#define	kp_p		80
-#define	kp_q		80
-#define kp_r		15
+#define kp_xy		32.0
+#define kd_xy		12.0
+#define	kp_z		32.0
+#define kd_z		12.0
+#define	kp_yaw		2.0
+#define	kp_p		80.0
+#define	kp_q		80.0
+#define kp_r		15.0
 
 #endif /* CONSTANTS_H_ */

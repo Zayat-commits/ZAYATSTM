@@ -54,6 +54,8 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
+#define  DEG_TO_RAD 0.01745
+#define  RAD_TO_DEG 57.295
 
 /* USER CODE END EM */
 
