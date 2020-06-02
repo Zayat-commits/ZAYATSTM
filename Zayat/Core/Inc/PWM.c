@@ -81,10 +81,10 @@ void ARM_Motors(void)
 	 * 													3    4
 	 *
 	 */
-void PWM(u16 dutyCycle, u8 motorNumber)
+void PWM(f32 dutyCycle, u8 motorNumber)
 {
-	u16 temp = dutyCycle * ONE_MS / 100 + ONE_MS;
-	sConfigOCZayat.Pulse = temp;
+	f32 temp = dutyCycle * ONE_MS / 100 + ONE_MS;
+	sConfigOCZayat.Pulse = (uint32_t) temp;
 
 	switch(motorNumber)
 	{

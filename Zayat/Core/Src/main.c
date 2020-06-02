@@ -215,22 +215,22 @@ int main(void)
   IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
 
   /* creation of PRINT_TTL */
-  PRINT_TTLHandle = osThreadNew(PrintPARAMS, (void*) p, &PRINT_TTL_attributes);
+//  PRINT_TTLHandle = osThreadNew(PrintPARAMS, (void*) p, &PRINT_TTL_attributes);
 
   /* creation of OUTPUT_THRUST */
   OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
 
   /* creation of ROLL_PITCH */
-  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
+//  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
 
   /* creation of YAW */
   YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
 
   /* creation of ALTITUDE_CONTRO */
-  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
+//  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
 
   /* creation of LATERAL_CONTROL */
-  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+//  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 ////////////////  /* add threads, ... */
@@ -547,7 +547,6 @@ void DroneStart(void *argument)
 	  /* Infinite loop */
 		for(;;)
 		{
-			//vdDroneStartBlock(argument);
 			fview(PRINT_NORMAL, 0, "0 to Calibrate, 1 to ARM, 2 to insert speed \n");
 			string_receive(buffer);
 		switch (atoi(buffer))
@@ -586,7 +585,8 @@ void DroneStart(void *argument)
 				break;
 		default: vCalibrate_Motors();
 			}
-		//osDelay(30000);
+		vdDroneStartBlock(argument);
+		osDelay(10000);
 	  }
   /* USER CODE END DroneStart */
 }

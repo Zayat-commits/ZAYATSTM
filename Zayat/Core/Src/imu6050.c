@@ -278,8 +278,8 @@ void imu_Comp_Filter(parameters *p, f32 RT)
 	acc[1]  -= errory;
 	acc[2]  -= errorz;
 
-	p->x += RT * p->x_dot;
-	p->y += RT * p->y_dot;
+//	p->x += RT * p->x_dot;
+//	p->y += RT * p->y_dot;
 //	p->z += RT * p->z_dot;
 
 	p->x_dot += RT * (acc[0] ) * 9.812;

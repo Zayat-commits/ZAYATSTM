@@ -27,7 +27,7 @@ void vdDroneStartBlock(parameters* ptr)
 {
 	u8 buffer[25];
 
-	fview(PRINT_NORMAL, 0, "Insert Psi Commanded: ");
+	fview(PRINT_NORMAL, 0, "Insert Psi Commanded: \n");
 	string_receive((char*)buffer);
 	ptr->psi_cmd = atoi(buffer)/1.0f;
 
@@ -103,16 +103,17 @@ void vdOutputBlock(parameters* ptr)
 	/*-----------*/
 	/*PWM MAPPING*/
 	/*-----------*/
-/*	u8 i;
-	u16 speed_pwm[4];
+	u8 i;
+	f32 speed_pwm[4]={0};
 	for(i=0 ; i<4;i++)
 	{
 		if (ptr->cmd_thrust[i] < F_min) ptr->cmd_thrust[i]=F_min;
 		if (ptr->cmd_thrust[i] > F_max) ptr->cmd_thrust[i]=F_max;
-		speed_pwm[i] = (1/(F_max-F_min))*ptr->cmd_thrust[i]*500.0;
+		speed_pwm[i] = (1/54)*(ptr->cmd_thrust[i])*25  + 40.0;
+//		fview(PRINT_NORMAL, 0, "speed of motor: ");
+//		fview(PRINT_FLOAT_NO_TAB, speed_pwm[i], " = ");
 		PWM(speed_pwm[i],i+1);
 	}
-*/
 }
 
 void vdRollPitchBlock(parameters* ptr)
@@ -155,6 +156,7 @@ void vdLateralBlock(parameters* ptr)
 void fview(uint8_t type, float argument, char * line)
 {
 	uint8_t buffer[50];
+	  __HAL_UNLOCK(&huart1);
 	if(type == PRINT_FLOAT_NO_TAB || type == PRINT_FLOAT_WITH_TAB)						//0 for printing variables, else for simple print
 	{
 		int32_t x = argument *100;

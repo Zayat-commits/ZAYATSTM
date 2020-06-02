@@ -14,12 +14,12 @@
 #define MIN 0
 #define MAX 100
 #define ARMED 595
-#define F_max 600
-#define F_min -3
+#define F_max 54
+#define F_min -54
 
 
 void ARM_Motors(void);
-void PWM(u16 dutyCycle, u8 motorNumber);
+void PWM(f32 dutyCycle, u8 motorNumber);
 void DISARM_Motors(void);
 void vCalibrate_Motors(void);
 
