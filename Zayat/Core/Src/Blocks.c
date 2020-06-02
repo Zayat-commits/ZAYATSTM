@@ -27,9 +27,9 @@ void vdDroneStartBlock(parameters* ptr)
 {
 	u8 buffer[25];
 
-	fview(PRINT_NORMAL, 0, "Insert Psi Commanded or 0 to stop \n");
+	fview(PRINT_NORMAL, 0, "Insert Psi Commanded or -1 to stop \n");
 	string_receive((char*)buffer);
-	if(atoi(buffer) == 0)
+	if(atoi(buffer) == -1)
 	{
 		PWM(0, 1);
 		PWM(0, 2);
