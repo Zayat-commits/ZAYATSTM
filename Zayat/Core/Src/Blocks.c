@@ -6,7 +6,9 @@
  */
 
 #include "Blocks.h"
-
+#include "main.h"
+extern f32 Xh,Yh;
+extern accel mag;
 void vdBodyRatesBlock(parameters* ptr)
 {
 	f32 p_error,q_error,r_error;
@@ -25,7 +27,7 @@ void vdDroneStartBlock(parameters* ptr)
 {
 	u8 buffer[25];
 
-	fview(PRINT_NORMAL, 0, "Insert Psi Commanded: ");
+	fview(PRINT_NORMAL, 0, "Insert Psi Commanded: \n");
 	string_receive((char*)buffer);
 	ptr->psi_cmd = atoi(buffer)/1.0f;
 
@@ -52,18 +54,18 @@ void vdMPUBlock(parameters* ptr)
 	/*Read Gyro and Accel values, then comp filter*/
 	Read_Accel_Values(ptr);
 	Read_Gyro_Values(ptr,INTEGRAL_DT);
-//	imu_Comp_Filter(ptr,INTEGRAL_DT);
+	imu_Comp_Filter(ptr,INTEGRAL_DT);
 //	Read_Compass_Values(ptr);
 
 	/*Template of function fview()-> fview(PRINT_TYPE, VARIABLE, STATEMENT)*/
-	if (adad ==10)
-	{
-		fview(PRINT_FLOAT_WITH_TAB, ptr->thetab, "Value of phi = ");
-		fview(PRINT_FLOAT_WITH_TAB, ptr->phib, "Value of theta = ");
-		fview(PRINT_FLOAT_NO_TAB, ptr->psic, "Value of psic = ");
-		adad=0;
-	}
-	adad++;
+//	if (adad ==20)
+//	{
+//		fview(PRINT_FLOAT_WITH_TAB, ptr->phi, "Value of x = ");
+//		fview(PRINT_FLOAT_WITH_TAB, ptr->theta, "Value of y = ");
+//		fview(PRINT_FLOAT_NO_TAB, ptr->psi, "Value of z = ");
+//		adad=0;
+//	}
+//	adad++;
 
 }
 
@@ -101,30 +103,31 @@ void vdOutputBlock(parameters* ptr)
 	/*-----------*/
 	/*PWM MAPPING*/
 	/*-----------*/
-/*	u8 i;
-	u16 speed_pwm[4];
+	u8 i;
+	f32 speed_pwm[4]={0};
 	for(i=0 ; i<4;i++)
 	{
 		if (ptr->cmd_thrust[i] < F_min) ptr->cmd_thrust[i]=F_min;
 		if (ptr->cmd_thrust[i] > F_max) ptr->cmd_thrust[i]=F_max;
-		speed_pwm[i] = (1/(F_max-F_min))*ptr->cmd_thrust[i]*500.0;
+		speed_pwm[i] = (1/54)*(ptr->cmd_thrust[i])*25  + 40.0;
+//		fview(PRINT_NORMAL, 0, "speed of motor: ");
+//		fview(PRINT_FLOAT_NO_TAB, speed_pwm[i], " = ");
 		PWM(speed_pwm[i],i+1);
 	}
-*/
 }
 
 void vdRollPitchBlock(parameters* ptr)
 {
 	f32 b_x_dot_cmd, b_y_dot_cmd, taw=1/kp_bank;
 	f32 R11 = 1;
-	f32 R12 = sin(ptr->phi) * sin(ptr->theta) / cos(ptr->theta);
-	f32 R13= cos(ptr->phi) * sin(ptr->theta) / cos(ptr->theta);
+	f32 R12 = sin(ptr->phi *DEG_TO_RAD) * sin(ptr->theta *DEG_TO_RAD) / cos(ptr->theta *DEG_TO_RAD);
+	f32 R13= cos(ptr->phi *DEG_TO_RAD) * sin(ptr->theta *DEG_TO_RAD) / cos(ptr->theta *DEG_TO_RAD);
 	f32 R21 = 0;
-	f32 R22 = cos(ptr->phi);
-	f32 R23= -sin(ptr->phi);
+	f32 R22 = cos(ptr->phi*DEG_TO_RAD);
+	f32 R23= -sin(ptr->phi*DEG_TO_RAD);
 	f32 R31 = 0;
-	f32 R32 = sin(ptr->phi) / cos(ptr->theta);
-	f32 R33 = cos(ptr->phi) / cos(ptr->theta);
+	f32 R32 = sin(ptr->phi*DEG_TO_RAD) / cos(ptr->theta*DEG_TO_RAD);
+	f32 R33 = cos(ptr->phi*DEG_TO_RAD) / cos(ptr->theta*DEG_TO_RAD);
 	f32 R13_cmd= ptr->x_dot_dot_cmd*m/ptr->u1;
 	f32 R23_cmd= ptr->y_dot_dot_cmd*m/ptr->u1;
 	b_x_dot_cmd= (R13-R13_cmd)/taw;
@@ -140,7 +143,7 @@ void vdYawBlock(parameters* ptr)
 
 void vdAltitudeBlock(parameters* ptr)
 {
-	f32 R33 = cos(ptr->phi)/cos(ptr->theta);
+	f32 R33 = cos(ptr->phi*DEG_TO_RAD)/cos(ptr->theta*DEG_TO_RAD);
 	ptr->z_dot_dot_cmd= kp_z*(ptr->z_cmd- ptr->z) + kd_z*(ptr->z_dot_cmd-ptr->z_dot);
 	ptr->u1 = m * (ptr->z_dot_dot_cmd - g)/R33;
 }
@@ -152,23 +155,24 @@ void vdLateralBlock(parameters* ptr)
 }
 void fview(uint8_t type, float argument, char * line)
 {
-	uint8_t buffer[25];
+	uint8_t buffer[50];
+	  __HAL_UNLOCK(&huart1);
 	if(type == PRINT_FLOAT_NO_TAB || type == PRINT_FLOAT_WITH_TAB)						//0 for printing variables, else for simple print
 	{
 		int32_t x = argument *100;
 		uint32_t y = abs(x%100);
 		if(argument < 0 && x/100 >= 0 && x/100 < 1 )
 		{
-			(type == PRINT_FLOAT_NO_TAB)? sprintf((char*)buffer, "%s-%ld.%02lu\r\n", line, x/100,y) : sprintf((char*)buffer, "%s-%ld.%02lu\t", line, x/100,y);
+			(type == PRINT_FLOAT_NO_TAB)? sprintf((char*)buffer, "%s-%ld.%02lu \n", line, x/100,y) : sprintf((char*)buffer, "%s-%ld.%02lu \t", line, x/100,y);
 		}
 		else
 		{
-			(type == PRINT_FLOAT_NO_TAB)? sprintf((char*)buffer, "%s%ld.%02lu\r\n", line, x/100,y) : sprintf((char*)buffer, "%s%ld.%02lu\t", line, x/100,y);
+			(type == PRINT_FLOAT_NO_TAB)? sprintf((char*)buffer, "%s%ld.%02lu \n", line, x/100,y) : sprintf((char*)buffer, "%s%ld.%02lu \t", line, x/100,y);
 		}
 	}
 	else if(type == PRINT_INT_NO_TAB || type == PRINT_INT_WITH_TAB)
 	{
-		(type == PRINT_INT_NO_TAB)? sprintf((char*)buffer, "%s%.02f\r\n", line,argument) : sprintf((char*)buffer, "%s%.02f\t", line, argument);
+		(type == PRINT_INT_NO_TAB)? sprintf((char*)buffer, "%s%.02f \n", line,argument) : sprintf((char*)buffer, "%s%.02f \t", line, argument);
 		sprintf((char*)buffer, line, (int32_t)argument);
 	}
 	else
@@ -206,7 +210,8 @@ void vInitPARAMETERS(parameters *ptr)
 	ptr->x_dot_cmd = ptr->y_dot_cmd = ptr->z_dot_cmd = 0;
 	ptr->x_dot_dot_cmd = ptr->y_dot_dot_cmd = ptr->z_dot_dot_cmd = 0;
 	ptr->psi_cmd = ptr->p_cmd = ptr->q_cmd = ptr->r_cmd = 0;
-	ptr->u1 = ptr->u2 = ptr->u3 = ptr->u4 = 0;
+	ptr->u1 =1;
+	ptr->u2 = ptr->u3 = ptr->u4 = 0;
 	ptr->cmd_thrust[0] = 0;
 	ptr->cmd_thrust[1] = 0;
 	ptr->cmd_thrust[2] = 0;
