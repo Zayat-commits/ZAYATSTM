@@ -27,26 +27,20 @@ void vdDroneStartBlock(parameters* ptr)
 {
 	u8 buffer[25];
 
-	fview(PRINT_NORMAL, 0, "Insert Psi Commanded: \n");
+	fview(PRINT_NORMAL, 0, "Insert Psi Commanded or 0 to stop \n");
 	string_receive((char*)buffer);
-	ptr->psi_cmd = atoi(buffer)/1.0f;
-
-  /*
-switch (atoi(buffer))
+	if(atoi(buffer) == 0)
 	{
-case 0:
-		vCalibrate_Motors();
-		break;
-case 1:	ARM_Motors();
-		PWM(ARMED,1);
-		PWM(ARMED,2);
-		PWM(ARMED,3);
-		PWM(ARMED,4);
-		break;
-default: vCalibrate_Motors();
+		PWM(0, 1);
+		PWM(0, 2);
+		PWM(0, 3);
+		PWM(0, 4);
 	}
-vTaskDelete(NULL);
-*/
+	else
+	{
+		ptr->psi_cmd = atoi(buffer)/1.0f;
+	}
+
 }
 void vdMPUBlock(parameters* ptr)
 {

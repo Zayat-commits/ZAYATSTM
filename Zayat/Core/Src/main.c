@@ -586,7 +586,7 @@ void DroneStart(void *argument)
 		default: vCalibrate_Motors();
 			}
 		vdDroneStartBlock(argument);
-		osDelay(10000);
+		osDelay(20);
 	  }
   /* USER CODE END DroneStart */
 }
