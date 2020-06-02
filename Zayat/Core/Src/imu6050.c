@@ -278,9 +278,9 @@ void imu_Comp_Filter(parameters *p, f32 RT)
 	acc[1]  -= errory;
 	acc[2]  -= errorz;
 
-	p->x += RT * p->x_dot;
-	p->y += RT * p->y_dot;
-	p->z += RT * p->z_dot;
+//	p->x += RT * p->x_dot;
+//	p->y += RT * p->y_dot;
+//	p->z += RT * p->z_dot;
 
 	p->x_dot += RT * (acc[0] ) * 9.812;
 	p->y_dot += RT * (acc[1] ) * 9.812;
@@ -316,9 +316,9 @@ void imu_Comp_Filter(parameters *p, f32 RT)
 		p->psi += 360;
 
 
-//	p->x_dot_dot = acc[0];
-//	p->y_dot_dot = acc[1];
-//	p->z_dot_dot = acc[2];
+	p->x_dot_dot = acc[0];
+	p->y_dot_dot = acc[1];
+	p->z_dot_dot = acc[2];
 
 
 }
