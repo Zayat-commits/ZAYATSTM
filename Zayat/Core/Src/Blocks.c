@@ -28,7 +28,7 @@ void vdDroneStartBlock(parameters* ptr)
 	u8 buffer[25];
 
 	fview(PRINT_NORMAL, 0, "Insert Psi Commanded or -1 to stop \n");
-	string_receive((char*)buffer);
+	string_receive(buffer);
 	if(atoi(buffer) == -1)
 	{
 		PWM(0, 1);
@@ -150,7 +150,7 @@ void vdLateralBlock(parameters* ptr)
 void fview(uint8_t type, float argument, char * line)
 {
 	uint8_t buffer[50];
-	  __HAL_UNLOCK(&huart1);
+//	  __HAL_UNLOCK(&huart1);
 	if(type == PRINT_FLOAT_NO_TAB || type == PRINT_FLOAT_WITH_TAB)						//0 for printing variables, else for simple print
 	{
 		int32_t x = argument *100;
@@ -176,14 +176,14 @@ void fview(uint8_t type, float argument, char * line)
 	HAL_UART_Transmit(&huart1, buffer, strlen((char*)buffer), HAL_MAX_DELAY);
 }
 
-void string_receive(char* buffer)
+void string_receive(u8* buffer)
 {
 	int i = 0;
-	HAL_UART_Receive(&huart1, (uint16_t*)&buffer[i], 1, HAL_MAX_DELAY);
+	HAL_UART_Receive(&huart1, &buffer[i], 1, HAL_MAX_DELAY);
 	while(buffer[i]!='#')
 	{
 		i++;
-		HAL_UART_Receive(&huart1, (uint8_t*)&buffer[i], 1, HAL_MAX_DELAY);
+		HAL_UART_Receive(&huart1, &buffer[i], 1, HAL_MAX_DELAY);
 	}
 	buffer[i] = '\0';
 }
