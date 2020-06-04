@@ -29,7 +29,7 @@ void vdLateralBlock(parameters* ptr);
 
 extern UART_HandleTypeDef huart1;
 void fview(uint8_t type, float argument, char * line);
-void string_receive(char* buffer);
+void string_receive(u8* buffer);
 void vInitPARAMETERS(parameters *ptr);
 
 #endif /* INC_BLOCKS_H_ */
