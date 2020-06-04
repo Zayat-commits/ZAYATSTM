@@ -30,10 +30,12 @@ void gps_init(void)
 }
 
 
-void Read_gps ()
+uint8_t Read_gps()
 {	static u16 counter=0;
 int32_t position[3];
 int32_t velocity[3];
+uint8_t flag;
+			flag = gps_data[16]; //Gps fix (PASS IT ONE I GET THE VARIABLE)
 			position[0] = ((((int32_t)(gps_data[18])& 0xFF)) | (((int32_t)(gps_data[19]& 0xFF)) <<8)|(((int32_t)(gps_data[20]& 0xFF))<<16) | (((int32_t)(gps_data[21]& 0xFF))<<24))/100.0;
 			position[1] = ((((int32_t)(gps_data[22])& 0xFF)) | (((int32_t)(gps_data[23]& 0xFF)) <<8)|(((int32_t)(gps_data[24]& 0xFF))<<16) | (((int32_t)(gps_data[25]& 0xFF))<<24))/100.0;
 			position[2] = ((((int32_t)(gps_data[26])& 0xFF)) | (((int32_t)(gps_data[27]& 0xFF)) <<8)|(((int32_t)(gps_data[28]& 0xFF))<<16) | (((int32_t)(gps_data[29]& 0xFF))<<24))/100.0;
@@ -50,4 +52,5 @@ int32_t velocity[3];
 			counter=0;
 			}
 			counter++;
+		return flag;
 }
