@@ -201,7 +201,8 @@ void EXTI15_10_IRQHandler(void)
 	PWM(0, 3);
 	PWM(0, 4);
 	/*For testing: turn off on board LED*/
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, LOW);
+//	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_15);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
