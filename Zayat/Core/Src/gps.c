@@ -30,7 +30,6 @@ void gps_init(void)
 
 
 uint8_t Read_gps(accel *position, accel *velocity)
-
 {
 	static int e=0;
 	while(gps_data[e]!= 0xb5 && gps_data[e+1]!=0x62)
