@@ -18,9 +18,9 @@ void Compass_Init()
 	HAL_Delay(150);
 
 
-	buf[0]=0x37; //Bypassing
-	buf[1]=0x02;
-	HAL_I2C_Master_Transmit(&hi2c1, 0b11010000, buf, 2, HAL_MAX_DELAY);
+//	buf[0]=0x37; //Bypassing
+//	buf[1]=0x02;
+//	HAL_I2C_Master_Transmit(&hi2c1, 0b11010000, buf, 2, HAL_MAX_DELAY);
 
 
 
@@ -32,18 +32,21 @@ void Compass_Init()
 	buf[2]=0b10100000;
 	buf[3]=0b00000000;
 	HAL_StatusTypeDef ret;
-	ret=HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 4, HAL_MAX_DELAY);
-//	ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
-//	while(ret !=HAL_OK)
-//	{
-//		HAL_I2C_DeInit(&hi2c1);
-//		//HAL_Delay(10);
-//		HAL_I2C_Init(&hi2c1);
-//		//HAL_Delay(10);
 //		ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
-//	}
-//
-//
+//		ret = HAL_I2C_GetState(&hi2c1);
+		ret=HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 4, HAL_MAX_DELAY);
+
+	while(ret !=HAL_OK)
+	{
+		HAL_I2C_DeInit(&hi2c1);
+		//HAL_Delay(10);
+		HAL_I2C_Init(&hi2c1);
+		//HAL_Delay(10);
+		ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
+	}
+
+	ret=HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 4, HAL_MAX_DELAY);
+
 
 
 HAL_Delay(100);
