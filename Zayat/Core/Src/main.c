@@ -62,7 +62,7 @@ const osThreadAttr_t BODY_RATES_attributes = {
 osThreadId_t DRONE_STARTHandle;
 const osThreadAttr_t DRONE_START_attributes = {
   .name = "DRONE_START",
-  .priority = (osPriority_t) osPriorityNormal3,
+  .priority = (osPriority_t) osPriorityHigh,
   .stack_size = 300 * 4
 };
 /* Definitions for IMU */
@@ -70,20 +70,6 @@ osThreadId_t IMUHandle;
 const osThreadAttr_t IMU_attributes = {
   .name = "IMU",
   .priority = (osPriority_t) osPriorityAboveNormal2,
-  .stack_size = 300 * 4
-};
-/* Definitions for PRINT_TTL */
-osThreadId_t PRINT_TTLHandle;
-const osThreadAttr_t PRINT_TTL_attributes = {
-  .name = "PRINT_TTL",
-  .priority = (osPriority_t) osPriorityNormal4,
-  .stack_size = 300 * 4
-};
-/* Definitions for INSERT_PARAMETE */
-osThreadId_t INSERT_PARAMETEHandle;
-const osThreadAttr_t INSERT_PARAMETE_attributes = {
-  .name = "INSERT_PARAMETE",
-  .priority = (osPriority_t) osPriorityHigh,
   .stack_size = 300 * 4
 };
 /* Definitions for OUTPUT_THRUST */
@@ -98,7 +84,7 @@ osThreadId_t ROLL_PITCHHandle;
 const osThreadAttr_t ROLL_PITCH_attributes = {
   .name = "ROLL_PITCH",
   .priority = (osPriority_t) osPriorityNormal7,
-  .stack_size = 300 * 4
+  .stack_size = 500 * 4
 };
 /* Definitions for YAW */
 osThreadId_t YAWHandle;
@@ -136,8 +122,6 @@ static void MX_I2C1_Init(void);
 void BodyRate(void *argument);
 void DroneStart(void *argument);
 void MPU(void *argument);
-void PrintPARAMS(void *argument);
-void insertPARAMS(void *argument);
 void outputTHRUST(void *argument);
 void RollPitch(void *argument);
 void YawCONTROLLER(void *argument);
@@ -192,9 +176,9 @@ int main(void)
 //  HAL_Delay(150);
 //  MPU_Init(p, INTEGRAL_DT);
 //  Compass_Init();
-  init_EKF();
+ // init_EKF();
 
-  gps_init();
+ // gps_init();
 
   /* USER CODE END 2 */
 
@@ -218,42 +202,36 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-//  /* creation of BODY_RATES */
-//  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
-//
-//  /* creation of DRONE_START */
-//  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
-//
-//  /* creation of IMU */
-//  IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
-//
-//  /* creation of PRINT_TTL */
-//  PRINT_TTLHandle = osThreadNew(PrintPARAMS, (void*) p, &PRINT_TTL_attributes);
-//
-//  /* creation of INSERT_PARAMETE */
-//  INSERT_PARAMETEHandle = osThreadNew(insertPARAMS, (void*) p, &INSERT_PARAMETE_attributes);
-//
-//  /* creation of OUTPUT_THRUST */
-//  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
-//
-//  /* creation of ROLL_PITCH */
-//  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
-//
-//  /* creation of YAW */
-//  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
-//
-//  /* creation of ALTITUDE_CONTRO */
-//  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
-//
-//  /* creation of LATERAL_CONTROL */
-//  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+  /* creation of BODY_RATES */
+  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
+
+  /* creation of DRONE_START */
+  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
+
+  /* creation of IMU */
+  IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
+
+  /* creation of OUTPUT_THRUST */
+  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
+
+  /* creation of ROLL_PITCH */
+  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
+
+  /* creation of YAW */
+  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
+
+  /* creation of ALTITUDE_CONTRO */
+  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
+
+  /* creation of LATERAL_CONTROL */
+  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 ////////////////  /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
-//  osKernelStart();
+  osKernelStart();
  
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
@@ -261,6 +239,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -458,7 +437,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 9600;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -518,7 +497,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : PB15 */
   GPIO_InitStruct.Pin = GPIO_PIN_15;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
@@ -659,43 +638,6 @@ void MPU(void *argument)
 		osDelayUntil(tickzayat);
 	}
   /* USER CODE END MPU */
-}
-
-/* USER CODE BEGIN Header_PrintPARAMS */
-/**
-* @brief Function implementing the PRINT_TTL thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_PrintPARAMS */
-void PrintPARAMS(void *argument)
-{
-  /* USER CODE BEGIN PrintPARAMS */
-  /* Infinite loop */
-  for(;;)
-  {
-	  vdPrintBlock(argument);
-	  osDelay(20);
-  }
-  /* USER CODE END PrintPARAMS */
-}
-
-/* USER CODE BEGIN Header_insertPARAMS */
-/**
-* @brief Function implementing the INSERT_PARAMETE thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_insertPARAMS */
-void insertPARAMS(void *argument)
-{
-  /* USER CODE BEGIN insertPARAMS */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END insertPARAMS */
 }
 
 /* USER CODE BEGIN Header_outputTHRUST */
