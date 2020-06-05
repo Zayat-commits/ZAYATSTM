@@ -41,6 +41,7 @@ extern "C" {
 #include "imu6050.h"
 #include "Blocks.h"
 #include "gps.h"
+#include "estimation.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

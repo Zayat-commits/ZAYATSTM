@@ -152,8 +152,6 @@ void lateral(void *argument);
 TIM_OC_InitTypeDef sConfigOCZayat = {0};
 parameters parameter;
 parameters* p = &parameter;
-accel gps_position_offset,gps_velocity,gps_position;
-
 /* USER CODE END 0 */
 
 /**
@@ -193,13 +191,11 @@ int main(void)
   vInitPARAMETERS(&parameter);
 //  HAL_Delay(150);
 //  MPU_Init(p, INTEGRAL_DT);
-//  Accel_calibration(p, INTEGRAL_DT);
 //  Compass_Init();
-
+  init_EKF();
 
   gps_init();
-  while(Read_gps(&gps_position,&gps_velocity)!=3);
-    gps_position_offset.x = gps_position.x; gps_position_offset.y = gps_position.y; gps_position_offset.z = gps_position.z;
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -265,7 +261,6 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-Read_gps(&gps_position,&gps_velocity);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

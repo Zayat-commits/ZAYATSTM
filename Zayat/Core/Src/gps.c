@@ -8,7 +8,7 @@
 #include "main.h"
 #include "STD_TYPES.h"
 #include "main.h"
-extern accel gps_position_offset;
+accel gps_position_offset,gps_velocity,gps_position;
 extern UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 uint8_t gps_init_9600[37]= {0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00,
@@ -26,6 +26,8 @@ void gps_init(void)
 	  HAL_UART_Init(&huart2);
 	  HAL_UART_Transmit(&huart2, gps_init_115200, 79, HAL_MAX_DELAY);
 	  HAL_UART_Receive_DMA(&huart2, gps_data, 60);
+	  while(Read_gps(&gps_position,&gps_velocity)!=3){}
+	  gps_position_offset.x = gps_position.x; gps_position_offset.y = gps_position.y; gps_position_offset.z = gps_position.z;
 }
 
 
