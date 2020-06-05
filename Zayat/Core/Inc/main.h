@@ -40,6 +40,7 @@ extern "C" {
 #include "PWM.h"
 #include "imu6050.h"
 #include "Blocks.h"
+#include "gps.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
