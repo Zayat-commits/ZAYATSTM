@@ -93,7 +93,7 @@ void MPU_Init(parameters *p, f32 RT)
 					p->r = temp3/1.0f;
 
 
-	for (u16 i=0 ; i<300 ; i++)
+	for (u16 i=0 ; i<1000 ; i++)
 	{
 		errorp= errorp + p->p;
 		errorq= errorq + p->q;
@@ -133,12 +133,12 @@ void MPU_Init(parameters *p, f32 RT)
 
 			HAL_Delay(3);
 	}
-	errorp=errorp/300.0;
-	errorq=errorq/300.0;
-	errorr=errorr/300.0;
-	errorxbody= errorxbody /300.0;
-	errorybody= errorybody /300.0;
-	errorzbody= errorzbody /300.0;
+	errorp=errorp/1000.0;
+	errorq=errorq/1000.0;
+	errorr=errorr/1000.0;
+	errorxbody= errorxbody /1000.0;
+	errorybody= errorybody /1000.0;
+	errorzbody= errorzbody /1000.0;
 
 
 }
@@ -269,22 +269,20 @@ void imu_Comp_Filter(parameters *p, f32 RT)
 	Rotate_BtoW(ang_vel,q);
 //----------------------------------------------------------------------------
 
-	//Quaternion(q, euler);
-	//idk khaled told me to add them idk what they do but seems like they use rotated accel
 	f32 acc[3] = {p->x_dot_dot, p->y_dot_dot, p->z_dot_dot};
 	Rotate_BtoW(acc, q); // there was a line to get q but i believe it's already there
 
-	acc[0] -= errorx;
-	acc[1]  -= errory;
-	acc[2]  -= errorz;
+//	acc[0] -= errorx;
+//	acc[1]  -= errory;
+//	acc[2]  -= errorz;
 
-//	p->x += RT * p->x_dot;
-//	p->y += RT * p->y_dot;
-//	p->z += RT * p->z_dot;
+	p->x += RT * p->x_dot;
+	p->y += RT * p->y_dot;
+	p->z += RT * p->z_dot;
 
-	p->x_dot += RT * (acc[0] ) * 9.812;
-	p->y_dot += RT * (acc[1] ) * 9.812;
-	p->z_dot += RT * (acc[2] ) * 9.812;
+	p->x_dot += RT * (acc[0] ) * 9.8;
+	p->y_dot += RT * (acc[1] ) * 9.8;
+	p->z_dot += RT * (acc[2]-1 ) * 9.8;
 
 
 	// Integrating the p q r to get angles
