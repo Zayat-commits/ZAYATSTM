@@ -49,6 +49,7 @@ TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_rx;
 
 /* Definitions for BODY_RATES */
 osThreadId_t BODY_RATESHandle;
@@ -127,6 +128,7 @@ const osThreadAttr_t LATERAL_CONTROL_attributes = {
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
@@ -181,16 +183,23 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   vInitPARAMETERS(&parameter);
-  HAL_Delay(150);
-  MPU_Init(p, INTEGRAL_DT);
-  Accel_calibration(p, INTEGRAL_DT);
+//  HAL_Delay(150);
+//  MPU_Init(p, INTEGRAL_DT);
+//  Accel_calibration(p, INTEGRAL_DT);
 //  Compass_Init();
+
+
+  accel gps_position_offset,gps_velocity,gps_position;
+  gps_init();
+  while(Read_gps(&gps_position,&gps_velocity)!=3);
+    gps_position_offset.x = gps_position.x; gps_position_offset.y = gps_position.y; gps_position_offset.z = gps_position.z;
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -213,42 +222,42 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of BODY_RATES */
-  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
-
-  /* creation of DRONE_START */
-  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
-
-  /* creation of IMU */
-  IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
-
-  /* creation of PRINT_TTL */
-  PRINT_TTLHandle = osThreadNew(PrintPARAMS, (void*) p, &PRINT_TTL_attributes);
-
-  /* creation of INSERT_PARAMETE */
-  INSERT_PARAMETEHandle = osThreadNew(insertPARAMS, (void*) p, &INSERT_PARAMETE_attributes);
-
-  /* creation of OUTPUT_THRUST */
-  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
-
-  /* creation of ROLL_PITCH */
-  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
-
-  /* creation of YAW */
-  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
-
-  /* creation of ALTITUDE_CONTRO */
-  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
-
-  /* creation of LATERAL_CONTROL */
-  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+//  /* creation of BODY_RATES */
+//  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
+//
+//  /* creation of DRONE_START */
+//  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
+//
+//  /* creation of IMU */
+//  IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
+//
+//  /* creation of PRINT_TTL */
+//  PRINT_TTLHandle = osThreadNew(PrintPARAMS, (void*) p, &PRINT_TTL_attributes);
+//
+//  /* creation of INSERT_PARAMETE */
+//  INSERT_PARAMETEHandle = osThreadNew(insertPARAMS, (void*) p, &INSERT_PARAMETE_attributes);
+//
+//  /* creation of OUTPUT_THRUST */
+//  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
+//
+//  /* creation of ROLL_PITCH */
+//  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
+//
+//  /* creation of YAW */
+//  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
+//
+//  /* creation of ALTITUDE_CONTRO */
+//  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
+//
+//  /* creation of LATERAL_CONTROL */
+//  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 ////////////////  /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
-  osKernelStart();
+//  osKernelStart();
  
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
@@ -256,7 +265,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+Read_gps(&gps_position,&gps_velocity);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -454,7 +463,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 9600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -468,6 +477,22 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
+
+}
+
+/** 
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void) 
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
 
 }
 
@@ -632,7 +657,7 @@ void MPU(void *argument)
 
 		/*Calculate total ticks needed for 10 ms period*/
 		tickzayat = osKernelGetTickCount() - tickzayat;
-		tickzayat = 10 - tickzayat;
+		tickzayat = 100 - tickzayat;
 		if(tickzayat < 0)tickzayat = 100;
 		tickzayat = osKernelGetTickCount() + tickzayat;
 		/*---------------------------------------------*/

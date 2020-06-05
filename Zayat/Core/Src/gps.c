@@ -8,8 +8,7 @@
 #include "main.h"
 #include "STD_TYPES.h"
 #include "main.h"
-accel distance, speed;
-
+extern accel gps_position_offset;
 extern UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 uint8_t gps_init_9600[37]= {0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00,
@@ -30,7 +29,8 @@ void gps_init(void)
 }
 
 
-uint8_t Read_gps()
+uint8_t Read_gps(accel *position, accel *velocity)
+
 {
 	static int e=0;
 	while(gps_data[e]!= 0xb5 && gps_data[e+1]!=0x62)
@@ -39,26 +39,27 @@ uint8_t Read_gps()
 	if (e==60)e=0;
 	}
 	static u16 counter=0;
-static int32_t position[3];
-static int32_t velocity[3];
 uint8_t flag;
 			flag = gps_data[(16+e)%60]; //Gps fix (PASS IT ONE I GET THE VARIABLE)
-			position[0] = ((((int32_t)(gps_data[(18+e)%60])& 0xFF)) | (((int32_t)(gps_data[(19+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(20+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(21+e)%60]& 0xFF))<<24))/100.0;
-			position[1] = ((((int32_t)(gps_data[(22+e)%60])& 0xFF)) | (((int32_t)(gps_data[(23+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(24+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(25+e)%60]& 0xFF))<<24))/100.0;
-			position[2] = ((((int32_t)(gps_data[(26+e)%60])& 0xFF)) | (((int32_t)(gps_data[(27+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(28+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(29+e)%60]& 0xFF))<<24))/100.0;
-			velocity[0] = ((((int32_t)(gps_data[(34+e)%60])& 0xFF)) | (((int32_t)(gps_data[(35+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(36+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(37+e)%60]& 0xFF))<<24))/100.0;
-			velocity[1] = ((((int32_t)(gps_data[(38+e)%60])& 0xFF)) | (((int32_t)(gps_data[(39+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(40+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(41+e)%60]& 0xFF))<<24))/100.0;
-			velocity[2] = ((((int32_t)(gps_data[(42+e)%60])& 0xFF)) | (((int32_t)(gps_data[(43+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(44+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(45+e)%60]& 0xFF))<<24))/100.0;
+			position->x = ((((int32_t)(gps_data[(18+e)%60])& 0xFF)) | (((int32_t)(gps_data[(19+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(20+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(21+e)%60]& 0xFF))<<24))/100.0;
+			position->y = ((((int32_t)(gps_data[(22+e)%60])& 0xFF)) | (((int32_t)(gps_data[(23+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(24+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(25+e)%60]& 0xFF))<<24))/100.0;
+			position->z = ((((int32_t)(gps_data[(26+e)%60])& 0xFF)) | (((int32_t)(gps_data[(27+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(28+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(29+e)%60]& 0xFF))<<24))/100.0;
+			velocity->x = ((((int32_t)(gps_data[(34+e)%60])& 0xFF)) | (((int32_t)(gps_data[(35+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(36+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(37+e)%60]& 0xFF))<<24))/100.0;
+			velocity->y = ((((int32_t)(gps_data[(38+e)%60])& 0xFF)) | (((int32_t)(gps_data[(39+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(40+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(41+e)%60]& 0xFF))<<24))/100.0;
+			velocity->z = ((((int32_t)(gps_data[(42+e)%60])& 0xFF)) | (((int32_t)(gps_data[(43+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(44+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(45+e)%60]& 0xFF))<<24))/100.0;
 			if(counter==10000){
-			fview(PRINT_FLOAT_WITH_TAB, position[0], "posx:");
-			fview(PRINT_FLOAT_WITH_TAB, position[1], "posy:");
-			fview(PRINT_FLOAT_WITH_TAB, position[2], "posz:");
-			fview(PRINT_FLOAT_WITH_TAB, velocity[0], "velx:");
-			fview(PRINT_FLOAT_WITH_TAB, velocity[1], "vely:");
-			fview(PRINT_FLOAT_WITH_TAB, velocity[2], "velz:");
+			fview(PRINT_FLOAT_WITH_TAB, position->x, "posx:");
+			fview(PRINT_FLOAT_WITH_TAB, position->y, "posy:");
+			fview(PRINT_FLOAT_WITH_TAB, position->z, "posz:");
+			fview(PRINT_FLOAT_WITH_TAB, velocity->x, "velx:");
+			fview(PRINT_FLOAT_WITH_TAB, velocity->y, "vely:");
+			fview(PRINT_FLOAT_WITH_TAB, velocity->z, "velz:");
 			fview(PRINT_FLOAT_NO_TAB, flag, "rady?:");
 			counter=0;
 			}
 			counter++;
+			position->x -= gps_position_offset.x;
+			position->y -= gps_position_offset.y;
+			position->z -= gps_position_offset.z;
 		return flag;
 }
