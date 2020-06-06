@@ -67,7 +67,7 @@ void ARM_Motors(void)
 		PWM(MIN,2);
 		PWM(MIN,3);
 		PWM(MIN,4);
-		parameter.pwm_status = PWM_ON;
+		parameter.status.pwm = PWM_ON;
 		do
 		{
 			fview(PRINT_NORMAL, 0, "PWM = 0, INSERT 0# AFTER TONE (BEEP-BEEP-BEEP) OR REPLUG/RESET IN CASE OF NO TONE\n");
@@ -240,7 +240,7 @@ void vdFreeRunPWM(void)
 				PWM(atoi(buffer), 2);
 				PWM(atoi(buffer), 3);
 				PWM(atoi(buffer), 4);
-				parameter.pwm_status = PWM_ON;
+				parameter.status.pwm = PWM_ON;
 				fview(PRINT_NORMAL, 0, "----------------------------------------------RECEIVED----------------------------------------------------- \n \n \n");
 
 			}

@@ -283,7 +283,7 @@ void vInitPARAMETERS(parameters *ptr)
 	ptr->cmd_thrust[2] = 0;
 	ptr->cmd_thrust[3] = 0;
 	ptr->motor1 = ptr->motor2 = ptr->motor3 = ptr->motor4 = 0;
-	ptr->pwm_status = PWM_OFF;
+	ptr->status.pwm = PWM_OFF;
 	ptr-> phib=ptr-> thetab=ptr-> psib=0;
 }
 
