@@ -24,6 +24,7 @@ void gps_init(void)
 	  HAL_UART_Transmit(&huart2, gps_init_115200, 79, HAL_MAX_DELAY);
 	  HAL_UART_Receive_DMA(&huart2, gps_data, 60);
 	  while(Read_gps(&gps_position,&gps_velocity)!=3){}
+	  HAL_Delay(20000);
 	  gps_position_offset.x = gps_position.x; gps_position_offset.y = gps_position.y; gps_position_offset.z = gps_position.z;
 }
 
@@ -45,7 +46,11 @@ uint8_t flag;
 			velocity->x = ((((int32_t)(gps_data[(34+e)%60])& 0xFF)) | (((int32_t)(gps_data[(35+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(36+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(37+e)%60]& 0xFF))<<24))/100.0;
 			velocity->y = ((((int32_t)(gps_data[(38+e)%60])& 0xFF)) | (((int32_t)(gps_data[(39+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(40+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(41+e)%60]& 0xFF))<<24))/100.0;
 			velocity->z = ((((int32_t)(gps_data[(42+e)%60])& 0xFF)) | (((int32_t)(gps_data[(43+e)%60]& 0xFF)) <<8)|(((int32_t)(gps_data[(44+e)%60]& 0xFF))<<16) | (((int32_t)(gps_data[(45+e)%60]& 0xFF))<<24))/100.0;
-			if(counter==10000){
+			position->x -= gps_position_offset.x;
+			position->y -= gps_position_offset.y;
+			position->z -= gps_position_offset.z;
+
+			if(counter==1){
 			fview(PRINT_FLOAT_WITH_TAB, position->x, "posx:");
 			fview(PRINT_FLOAT_WITH_TAB, position->y, "posy:");
 			fview(PRINT_FLOAT_WITH_TAB, position->z, "posz:");
@@ -56,8 +61,5 @@ uint8_t flag;
 			counter=0;
 			}
 			counter++;
-			position->x -= gps_position_offset.x;
-			position->y -= gps_position_offset.y;
-			position->z -= gps_position_offset.z;
 		return flag;
 }
