@@ -37,7 +37,16 @@ typedef struct parameters{
 	f32 psi_cmd, p_cmd, q_cmd, r_cmd;
 	f32 u1, u2, u3, u4;
 	f32 cmd_thrust[4];
-	u8 pwm_status;
+	struct status
+	{
+		u8 calibrated;
+		u8 armed;
+		u8 compass_state;
+		u8 mpu_state;
+		u8 gps_state;
+		u8 ekf_state;
+		u8 pwm;
+	}status;
 	u8 ret_flag;
 	f32 motor1,motor2,motor3,motor4;
 } parameters;

@@ -301,6 +301,7 @@ void vdUserInterface(void)
 	fview(PRINT_NORMAL, 0, "MODE 5: FULL TEST OF SYSTEM WITHOUT MOTORS \n");
 	fview(PRINT_NORMAL, 0, "MODE 6: GET STATUS \n");
 	fview(PRINT_NORMAL, 0, "MODE 7: PROGRAM START \n");
+	fview(PRINT_NORMAL, 0, "MODE 8: SYSTEM RESET \n");
 }
 u8 u8TestUserInterface(const char* line,parameters* ptr )		/*returns value of what the user wants to do: Insert, Return or Exit*/
 {

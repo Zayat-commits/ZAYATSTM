@@ -29,7 +29,6 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-//im here
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -173,12 +172,12 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   vInitPARAMETERS(&parameter);
-  //HAL_Delay(150);
-  MPU_Init(p, INTEGRAL_DT);
-  Compass_Init();
-  init_EKF();
-
-  gps_init();
+//  HAL_Delay(150);
+//  MPU_Init(p, INTEGRAL_DT);
+//  Compass_Init();
+//  init_EKF();
+//
+//  gps_init();
 
   /* USER CODE END 2 */
 
@@ -571,7 +570,7 @@ void DroneStart(void *argument)
 		{
 			vdUserInterface();
 			string_receive(buffer);
-		}while(atoi(buffer) < MODE_0 || atoi(buffer) > MODE_7);
+		}while(atoi(buffer) < MODE_0 || atoi(buffer) > MODE_8);
 
 		/*Code gets here upon successful selection of mode*/
 	switch (atoi(buffer))
@@ -587,7 +586,7 @@ void DroneStart(void *argument)
 		break;
 	case MODE_3:
 		fview(PRINT_INT_NO_TAB, HOVER, "SETTING PWM TO: ");
-		parameter.pwm_status = PWM_ON;
+		parameter.status.pwm = PWM_ON;
 		PWM(HOVER, MOTOR1);
 		PWM(HOVER, MOTOR2);
 		PWM(HOVER, MOTOR3);
@@ -595,19 +594,46 @@ void DroneStart(void *argument)
 		break;
 	case MODE_4:
 		/*GIVE PRIORITY TO FIRST BLOCK AND LOWER PRIORITY OF THIS FUNTION*/
-		parameter.pwm_status = PWM_ON;
+		parameter.status.pwm = PWM_ON;
 		/*INSERT TARGET COMMANDS*/
 		vdDroneStartBlock(argument);
 		//osThreadSetPriority(DRONE_STARTHandle, osPriorityBelowNormal);
 		break;
 	case MODE_5:
 		/*GIVE PRIORITY TO FIRST BLOCK AND LOWER PRIORITY OF THIS FUNTION, NO PWM GENERATED*/
+		parameter.status.pwm = PWM_OFF;
+		vdDroneStartBlock(argument);
 		break;
 	case MODE_6:
 		/*PRINT ALL PWM, COORDINATES, ORIENTATION, NEXT TASK AND COMMANDED TASK*/
+		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+		fview(PRINT_NORMAL, 0, "-------------------------------------------DRONE STATUS REPORT----------------------------------------------\n \n");
+		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+		fview(PRINT_FLOAT_NO_TAB, parameter.motor1, "SPEED OF MOTOR 1 (TOP LEFT CORNER) 		= ");
+		fview(PRINT_FLOAT_NO_TAB, parameter.motor2, "SPEED OF MOTOR 2 (TOP RIGHT CORNER) 	= ");
+		fview(PRINT_FLOAT_NO_TAB, parameter.motor3, "SPEED OF MOTOR 3 (BOTTOM LEFT CORNER) 	= ");
+		fview(PRINT_FLOAT_NO_TAB, parameter.motor4, "SPEED OF MOTOR 4 (BOTTOM RIGHT CORNER) 	= ");
+		fview(PRINT_FLOAT_WITH_TAB, parameter.x, "CURRENT POSITION OF DRONE:	 X = ");
+		fview(PRINT_FLOAT_WITH_TAB, parameter.y, "Y = ");
+		fview(PRINT_FLOAT_NO_TAB, parameter.z, "Z = ");
+		fview(PRINT_INT_NO_TAB, parameter.status.armed, 			"ARMED? 			= ");
+		fview(PRINT_INT_NO_TAB, parameter.status.calibrated, 		"CALIBRATED? 		= ");
+		fview(PRINT_INT_NO_TAB, parameter.status.compass_state, 	"COMPASS ACTIVE? 		= ");
+		fview(PRINT_INT_NO_TAB, parameter.status.ekf_state, 		"EKF ACTIVE? 		= ");
+		fview(PRINT_INT_NO_TAB, parameter.status.gps_state, 		"GPS ACTIVE? 		= ");
+		do
+			{
+				fview(PRINT_NORMAL, 0, "PRESS 0 TO GO BACK TO MENU");
+				string_receive(buffer);
+			}while(atoi(buffer)!=0);
+		parameter.ret_flag = 1;
 		break;
-	case 7:
-
+	case MODE_7:
+		/*Raspberry configs should be here*/
+		parameter.ret_flag = 1;
+		break;
+	case MODE_8:
+		HAL_NVIC_SystemReset();
 		break;
 	default:
 		parameter.ret_flag = 1;
@@ -617,7 +643,7 @@ void DroneStart(void *argument)
 		parameter.ret_flag = 0;
 	}
 	else
-	{
+	{	/*should set task to lower priority*/
 		osDelay(20);
 	}
   }
@@ -777,6 +803,10 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+	s8 buffer[50];
+	sprintf(buffer, "ERROR HANDLER: Thread name = %s \n",osThreadGetName(osThreadGetId()));
+	fview(PRINT_NORMAL,0, buffer);
+	HAL_NVIC_SystemReset();
   /* USER CODE END Error_Handler_Debug */
 }
 

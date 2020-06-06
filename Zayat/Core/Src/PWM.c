@@ -93,43 +93,50 @@ void ARM_Motors(void)
 void PWM(f32 dutyCycle, u8 motorNumber)
 {
 	f32 temp = dutyCycle * ONE_MS / 100.0 + ONE_MS;
-	sConfigOCZayat.Pulse = (uint32_t) temp;
-	if(motorNumber == 1)parameter.motor1 = temp;
-	if(motorNumber == 2)parameter.motor2 = temp;
-	if(motorNumber == 3)parameter.motor3 = temp;
-	if(motorNumber == 4)parameter.motor4 = temp;
-	switch(motorNumber)
+	if(parameter.status.pwm == PWM_ON)
 	{
-	case 1:
-		   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_1) != HAL_OK)
-		   {
-			 Error_Handler();
-		   }
-		   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-		   break;
-	case 2:
-		   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_2) != HAL_OK)
-		   {
-			 Error_Handler();
-		   }
-		   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
-		   break;
-	case 3:
-		   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_3) != HAL_OK)
-		   {
-			 Error_Handler();
-		   }
-		   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-		   break;
-	case 4:
-		   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_4) != HAL_OK)
-		   {
-			 Error_Handler();
-		   }
-		   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
-		   break;
-	default:
-		ARM_Motors();
+		sConfigOCZayat.Pulse = (uint32_t) temp;
+		if(motorNumber == 1)parameter.motor1 = temp;
+		if(motorNumber == 2)parameter.motor2 = temp;
+		if(motorNumber == 3)parameter.motor3 = temp;
+		if(motorNumber == 4)parameter.motor4 = temp;
+		switch(motorNumber)
+		{
+		case 1:
+			   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_1) != HAL_OK)
+			   {
+				 Error_Handler();
+			   }
+			   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+			   break;
+		case 2:
+			   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_2) != HAL_OK)
+			   {
+				 Error_Handler();
+			   }
+			   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+			   break;
+		case 3:
+			   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_3) != HAL_OK)
+			   {
+				 Error_Handler();
+			   }
+			   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+			   break;
+		case 4:
+			   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_4) != HAL_OK)
+			   {
+				 Error_Handler();
+			   }
+			   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
+			   break;
+		default:
+			PWM(0, MOTOR1);
+			PWM(0, MOTOR2);
+			PWM(0, MOTOR3);
+			PWM(0, MOTOR4);
+		}
+
 	}
 }
 

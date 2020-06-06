@@ -70,6 +70,7 @@ extern "C" {
 #define MODE_5	5
 #define MODE_6	6
 #define MODE_7	7
+#define MODE_8	8
 
 #define MOTOR1	1
 #define MOTOR2	2

@@ -88,11 +88,15 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
+	  	s8 buffer[50];
 
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+		sprintf(buffer, "HARDFAULT ERROR: Thread name = %s \n",osThreadGetName(osThreadGetId()));
+		fview(PRINT_NORMAL,0, buffer);
+		HAL_NVIC_SystemReset();
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
