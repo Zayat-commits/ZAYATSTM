@@ -6,8 +6,8 @@
  */
 #include "main.h"
 
-f32 ekfcov[7][7], hprimegps[6][7], hprimeMag[7] = {0},  R_GPS[6][6],Q_load[7][7], R_mag, dt = 0.001, toinvert[12][12], K[7][6], gprime[7][7] = {0};
-f32 z[6], zfromX[6];
+f32 ekfcov[7][7], hprimegps[6][7], hprimeMag[7] = {0},  R_GPS[6][6],Q_load[7][7], R_mag, dt = 0.001,inverse[6][6], toinvert[6][6], K[7][6], gprime[7][7] = {0};
+f32 z[6][1], zfromX[6];
 accel distance;
 accel speed;
 void matrix_multi(int o, int n, int l,f32 mat1[][l],f32 mat2[][n], f32 mat3[][n])
@@ -104,47 +104,46 @@ void updatefromGps(parameters *ptr)
 	fix = Read_gps(position, velocity);
 	if (fix == 3)
 	{
-		z[0] = position-> x;
-		z[1] = position-> y;
-		z[2] = position-> z;
-		z[3] = velocity-> x;
-		z[4] = velocity-> y;
-		z[5] = velocity-> z;
+		z[0][0] = position-> x;
+		z[1][0] = position-> y;
+		z[2][0] = position-> z;
+		z[3][0] = velocity-> x;
+		z[4][0] = velocity-> y;
+		z[5][0] = velocity-> z;
 		for (int i =0; i<6; i++)
-			hprimegps[i][i] = 1;
-		for (int i=0;i<7;i++)
-			for(int j=0; j<7; j++)
-				hprimegpsT[i][j]=hprimegps[j][i];
+		{	hprimegps[i][i] = 1;
+			hprimegpsT[i][i] = 1;
+		}
 		f32 sum=0;
 		f32 temp1[6][7];
 		f32 temp2[6][6];
 		f32 temp3[7][6];
-		f32 temp4[7], temp5[7][7], temp6[7][7];
+		f32 temp4[7][1], temp5[7][7], temp6[7][7];
 		matrix_multi(6,7,7, hprimegps,ekfcov,temp1);
 		matrix_multi(6,6,7, temp1,hprimegpsT,temp2);
 		for (int i=0;i<6;i++)
 			for (int j=0;j<6;j++)
 				toinvert[i][j] = temp2[i][j] + R_GPS[i][j];
-		matrix_inverse();
+		cofactor(toinvert, 6);
 		matrix_multi(7,6,7, ekfcov,hprimegpsT,temp3);
 		for (int i=0;i<7;i++){
 			for (int j=0; j<6;j++){
 				for (int k=0; k<6;k++){
-					sum = sum + temp3[i][k] * toinvert[6+k][j];
+					sum = sum + temp3[i][k] * inverse[k][j];
 				}
 				K[i][j] = sum;
 				sum = 0;
 			}
 		}
 		for(int k=0; k<6; k++)
-			z[k] = z[k] - zfromX[k];
+			z[k][0] = z[k][0] - zfromX[k];
 		matrix_multi(7,1,6, K,z,temp4);
-		ptr->x += temp4[0];
-		ptr->y += temp4[1];
-		ptr->z += temp4[2];
-		ptr->x_dot += temp4[3];
-		ptr->y_dot += temp4[4];
-		ptr->z_dot += temp4[5];
+		ptr->x += temp4[0][0];
+		ptr->y += temp4[1][0];
+		ptr->z += temp4[2][0];
+		ptr->x_dot += temp4[3][0];
+		ptr->y_dot += temp4[4][0];
+		ptr->z_dot += temp4[5][0];
 	matrix_multi(7,7,6, K,hprimegps, temp5);
 		for(int i = 0; i<7; i++){
 			for(int j = 0; j<7;j++)
@@ -196,7 +195,7 @@ void updatefromMag(parameters *ptr)
 		}
 		ptr->psi = ptr->psi + temp1[6] * (zfromX_mag - z_mag);
 		for (int i=0;i<7;i++){
-			for (int j=0; j<j;j++){
+			for (int j=0; j<7;j++){
 					if (i == j)
 						temp3[i][j] = 1 - temp1[i] * hprimeMag[j];
 					else

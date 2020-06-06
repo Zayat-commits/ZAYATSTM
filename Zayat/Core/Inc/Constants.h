@@ -11,7 +11,7 @@
 #define Ixx			0.08
 #define Iyy			0.08
 #define Izz 		0.000638
-#define m			1.5
+#define mass		1.5
 #define kp_bank		10.0
 #define g			9.812
 #define L  			1.0

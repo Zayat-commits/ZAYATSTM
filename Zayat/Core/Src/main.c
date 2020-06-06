@@ -174,11 +174,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
   vInitPARAMETERS(&parameter);
   //HAL_Delay(150);
-  //MPU_Init(p, INTEGRAL_DT);
-  //Compass_Init();
-  //init_EKF();
+  MPU_Init(p, INTEGRAL_DT);
+  Compass_Init();
+  init_EKF();
 
-  //gps_init();
+  gps_init();
 
   /* USER CODE END 2 */
 
