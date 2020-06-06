@@ -4,9 +4,6 @@
  *  Created on: May 31, 2020
  *      Author: Khaled Ali
  */
-#include "gps.h"
-#include "main.h"
-#include "STD_TYPES.h"
 #include "main.h"
 accel gps_position_offset,gps_velocity,gps_position;
 extern UART_HandleTypeDef huart2;

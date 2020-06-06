@@ -37,6 +37,8 @@ typedef struct parameters{
 	f32 psi_cmd, p_cmd, q_cmd, r_cmd;
 	f32 u1, u2, u3, u4;
 	f32 cmd_thrust[4];
+	u8 status;
+	u8 ret_flag;
 } parameters;
 
 typedef struct accel{

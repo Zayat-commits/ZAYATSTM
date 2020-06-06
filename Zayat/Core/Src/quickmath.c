@@ -4,9 +4,8 @@
  *  Created on: Feb 18, 2020
  *      Author: Khaled Ali
  */
-#include "STD_TYPES.h"
-#include "quickmath.h"
-#include "math.h"
+
+#include "main.h"
 
 float power(float base, int exp) {
     if(exp < 0) {
@@ -24,79 +23,7 @@ float power(float base, int exp) {
 int fact(int n) {
     return n <= 0 ? 1 : n * fact(n-1);
 }
-//new comment
 
-/*float sine(f32 deg) {
-    while(deg>360)
-    {
-    	deg-=360;
-    }
-    while(deg<-360)
-    {
-    	deg+=360;
-    }
-    float rad = deg * PI / 180;
-    float sin = 0;
-
-    int i;
-    for(i = 0; i < TERMS; i++) { // That's Taylor series!!
-        sin += power(-1, i) * power(rad, 2 * i + 1) / fact(2 * i + 1);
-    }
-    return sin;
-}
-
-float cosine(f32 deg) {
-    while(deg>360)
-    {
-    	deg-=360;
-    }
-    while(deg<-360)
-    {
-    	deg+=360;
-    }
-    float rad = deg * PI / 180;
-    float cos = 0;
-
-    int i;
-    for(i = 0; i < TERMS; i++) { // That's also Taylor series!!
-        cos += power(-1, i) * power(rad, 2 * i) / fact(2 * i);
-    }
-    return cos;
-}
-float arctan(f32 x)
-{	u8 flipflag=0;
-	if(x>1 || x<-1)
-		{x=1/x; flipflag=1;}
-	float atan=0;
-	int i;
-	for(i=0; i< TERMS; i++){
-		atan+=power(-1,i) * power(x, (2 *i) + 1) / ((2 *i) + 1);
-	}
-	if(flipflag==1)
-		atan=(PI/2)-atan;
-	return atan;
-}
-float sqt (int number)
-{
-    float temp, sqrt;
-    // store the half of the given number e.g from 256 => 128
-    sqrt = number / 2;
-    temp = 0;
-
-    // Iterate until sqrt is different of temp, that is updated on the loop
-    while(sqrt != temp){
-        // initially 0, is updated with the initial value of 128
-        // (on second iteration = 65)
-        // and so on
-        temp = sqrt;
-
-        // Then, replace values (256 / 128 + 128 ) / 2 = 65
-        // (on second iteration 34.46923076923077)
-        // and so on
-        sqrt = ( number/temp + temp) / 2;
-    }
-return sqrt;
-}*/
 void Quaternion(f32 *q, f32 *euler)
 {
 

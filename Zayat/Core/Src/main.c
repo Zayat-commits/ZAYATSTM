@@ -63,7 +63,7 @@ osThreadId_t DRONE_STARTHandle;
 const osThreadAttr_t DRONE_START_attributes = {
   .name = "DRONE_START",
   .priority = (osPriority_t) osPriorityHigh,
-  .stack_size = 300 * 4
+  .stack_size = 700 * 4
 };
 /* Definitions for IMU */
 osThreadId_t IMUHandle;
@@ -173,12 +173,12 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   vInitPARAMETERS(&parameter);
-//  HAL_Delay(150);
-//  MPU_Init(p, INTEGRAL_DT);
-//  Compass_Init();
- // init_EKF();
+  //HAL_Delay(150);
+  //MPU_Init(p, INTEGRAL_DT);
+  //Compass_Init();
+  //init_EKF();
 
- // gps_init();
+  //gps_init();
 
   /* USER CODE END 2 */
 
@@ -186,48 +186,48 @@ int main(void)
   osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_MUTEX */
-////////  /* add mutexes, ... */
+  /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-////////  /* add semaphores, ... */
+  /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-////////  /* start timers, add new ones, ... */
+  /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-////////  /* add queues, ... */
+  /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
   /* creation of BODY_RATES */
-  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
+//  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
 
   /* creation of DRONE_START */
   DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
 
   /* creation of IMU */
-  IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
-
-  /* creation of OUTPUT_THRUST */
-  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
-
-  /* creation of ROLL_PITCH */
-  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
-
-  /* creation of YAW */
-  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
-
-  /* creation of ALTITUDE_CONTRO */
-  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
-
-  /* creation of LATERAL_CONTROL */
-  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+//  IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
+//
+//  /* creation of OUTPUT_THRUST */
+//  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
+//
+//  /* creation of ROLL_PITCH */
+//  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
+//
+//  /* creation of YAW */
+//  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
+//
+//  /* creation of ALTITUDE_CONTRO */
+//  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
+//
+//  /* creation of LATERAL_CONTROL */
+//  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
-////////////////  /* add threads, ... */
+  /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
@@ -562,52 +562,55 @@ void BodyRate(void *argument)
 /* USER CODE END Header_DroneStart */
 void DroneStart(void *argument)
 {
-  /* USER CODE BEGIN DroneStart */
-		char buffer[10];
-	  /* Infinite loop */
-		for(;;)
-		{
-			fview(PRINT_NORMAL, 0, "0 to Calibrate, 1 to ARM, 2 to insert speed \n");
-			string_receive(buffer);
-		switch (atoi(buffer))
-			{
-		case 0:
-				vCalibrate_Motors();
-				break;
-		case 1:	ARM_Motors();
-				PWM(ARMED,1);
-				PWM(ARMED,2);
-				PWM(ARMED,3);
-				PWM(ARMED,4);
-				break;
-		case 2: fview(PRINT_NORMAL, 0, "insert speed, range = 0% -> 100%, -1 to exit\n");
-				string_receive(buffer);
-				while(atoi(buffer) != -1)
-				{
 
-					if(atoi(buffer) < 0 || atoi(buffer) > 100)
-					{
-						u8 error = 1;
-						fview(PRINT_NORMAL, 0, "insert correct number (0 ~ 100) \n");
-						while(error == 1)
-						{
-							string_receive(buffer);
-							error = (atoi(buffer) < 0 || atoi(buffer) > 100)?  1 : 0;
-						}
-					}
-					PWM(atoi(buffer),1);
-					PWM(atoi(buffer),2);
-					PWM(atoi(buffer),3);
-					PWM(atoi(buffer),4);
-					fview(PRINT_NORMAL, 0, "insert speed, range = 0% -> 100%, -1 to exit\n");
-					string_receive(buffer);
-				}
-				break;
-		default: vCalibrate_Motors();
-			}
-		vdDroneStartBlock(argument);
+  /* USER CODE BEGIN DroneStart */
+	char buffer[10];
+  /* Infinite loop */
+	for(;;)
+	{
+		do
+		{
+			vdUserInterface();
+			string_receive(buffer);
+		}while(atoi(buffer) < MODE_0 || atoi(buffer) > MODE_7);
+
+		/*Code gets here upon successful selection of mode*/
+	switch (atoi(buffer))
+		{
+	case MODE_0:
+		vCalibrate_Motors();
+		break;
+	case MODE_1:
+		ARM_Motors();
+		break;
+	case MODE_2:
+		vdFreeRunPWM();
+		break;
+	case MODE_3:
+
+		break;
+	case MODE_4:
+
+		break;
+	case MODE_5:
+
+		break;
+	case MODE_6:
+
+		break;
+	default:
+		parameter.ret_flag = 1;
+		}
+	//vdDroneStartBlock(argument);
+	if(parameter.ret_flag == 1)
+	{
+		parameter.ret_flag = 0;
+	}
+	else
+	{
 		osDelay(20);
-	  }
+	}
+  }
   /* USER CODE END DroneStart */
 }
 

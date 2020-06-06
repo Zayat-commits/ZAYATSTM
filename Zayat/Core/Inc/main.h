@@ -37,11 +37,14 @@ extern "C" {
 #include <string.h>
 #include "STD_TYPES.h"
 #include "Constants.h"
+#include "imu6050.h"
+#include "quickmath.h"
 #include "PWM.h"
 #include "imu6050.h"
 #include "Blocks.h"
 #include "gps.h"
 #include "estimation.h"
+#include "bmp.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -58,6 +61,15 @@ extern "C" {
 /* USER CODE BEGIN EM */
 #define  DEG_TO_RAD 0.01745
 #define  RAD_TO_DEG 57.295
+
+#define MODE_0	0
+#define MODE_1	1
+#define MODE_2	2
+#define MODE_3	3
+#define MODE_4	4
+#define MODE_5	5
+#define MODE_6	6
+#define MODE_7	7
 
 /* USER CODE END EM */
 

@@ -10,7 +10,6 @@
  *  Created on: Oct 3, 2019
  *      Author: Zayat
  */
-#include "imu6050.h"
 #include "main.h"
 extern I2C_HandleTypeDef hi2c1;
 

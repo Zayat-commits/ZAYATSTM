@@ -9,7 +9,6 @@
 #define PWM_H_
 
 
-#include "STD_TYPES.h"
 #include "main.h"
 #define MIN 0
 #define MAX 100
@@ -22,5 +21,6 @@ void ARM_Motors(void);
 void PWM(f32 dutyCycle, u8 motorNumber);
 void DISARM_Motors(void);
 void vCalibrate_Motors(void);
+void vdFreeRunPWM(void);
 
 #endif /* PWM_H_ */

@@ -5,15 +5,13 @@
  *      Author: Khaled Ali
  */
 #include "main.h"
-#include "STD_TYPES.h"
-#include "quickmath.h"
-#include "gps.h"
+
 f32 ekfcov[7][7], hprimegps[6][7], hprimeMag[7] = {0},  R_GPS[6][6],Q_load[7][7], R_mag, dt = 0.001, toinvert[12][12], K[7][6], gprime[7][7] = {0};
 f32 z[6], zfromX[6];
 accel distance;
 accel speed;
 void matrix_multi(int o, int n, int l,f32 mat1[][l],f32 mat2[][n], f32 mat3[][n])
-{	u8 sum =0;
+{	f32 sum =0;
 	for (int i=0;i<o;i++){
 		for (int j=0; j<n;j++){
 			for (int k=0; k<l;k++){

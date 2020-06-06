@@ -1,9 +1,5 @@
 
-
 #include "compass.h"
-
-
-
 
 f32 Xh,Yh;
 f32 xMax, yMax, xMin, yMin,zMin, zMax;

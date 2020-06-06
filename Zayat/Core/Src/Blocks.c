@@ -5,7 +5,6 @@
  *      Author: abdul
  */
 
-#include "Blocks.h"
 #include "main.h"
 extern f32 Xh,Yh;
 extern accel mag;
@@ -49,7 +48,7 @@ void vdMPUBlock(parameters* ptr)
 	Read_Accel_Values(ptr);
 	Read_Gyro_Values(ptr,INTEGRAL_DT);
 	imu_Comp_Filter(ptr,INTEGRAL_DT);
-//	Read_Compass_Values(ptr);
+	Read_Compass_Values(ptr);
 
 	/*Template of function fview()-> fview(PRINT_TYPE, VARIABLE, STATEMENT)*/
 //	if (adad ==20)
@@ -149,7 +148,7 @@ void vdLateralBlock(parameters* ptr)
 }
 void fview(uint8_t type, float argument, char * line)
 {
-	uint8_t buffer[50];
+	uint8_t buffer[100];
 //	  __HAL_UNLOCK(&huart1);
 	if(type == PRINT_FLOAT_NO_TAB || type == PRINT_FLOAT_WITH_TAB)						//0 for printing variables, else for simple print
 	{
@@ -166,8 +165,7 @@ void fview(uint8_t type, float argument, char * line)
 	}
 	else if(type == PRINT_INT_NO_TAB || type == PRINT_INT_WITH_TAB)
 	{
-		(type == PRINT_INT_NO_TAB)? sprintf((char*)buffer, "%s%.02f \n", line,argument) : sprintf((char*)buffer, "%s%.02f \t", line, argument);
-		sprintf((char*)buffer, line, (int32_t)argument);
+		(type == PRINT_INT_NO_TAB)? sprintf((char*)buffer, "%s%d \n", line,(int)argument) : sprintf((char*)buffer, "%s%d \t", line, (int)argument);
 	}
 	else
 	{
@@ -211,4 +209,20 @@ void vInitPARAMETERS(parameters *ptr)
 	ptr->cmd_thrust[2] = 0;
 	ptr->cmd_thrust[3] = 0;
 	ptr-> phib=ptr-> thetab=ptr-> psib=0;
+}
+
+void vdUserInterface(void)
+{
+	fview(PRINT_NORMAL, 0, "#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*##*#*#*#*#*#*#*#**#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*\n");
+	fview(PRINT_NORMAL, 0, "#*----------------------------------RAVEN5 DRONE USER INTERFACE-------------------------------------------#*\n");
+	fview(PRINT_NORMAL, 0, "#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*\n");
+	fview(PRINT_NORMAL, 0, "SELECT MODE OF OPERATION BY INSERTING MODE NUMBER:\n");
+	fview(PRINT_NORMAL, 0, "MODE 0: CALIBRATION OF MOTORS \n");
+	fview(PRINT_NORMAL, 0, "MODE 1: NORMAL START OF MOTORS \n");
+	fview(PRINT_NORMAL, 0, "MODE 2: FREE CONTROL OF MOTORS \n");
+	fview(PRINT_NORMAL, 0, "MODE 3: HOVER POWER OF MOTORS \n");
+	fview(PRINT_NORMAL, 0, "MODE 4: FULL TEST OF SYSTEM WITH MOTORS \n");
+	fview(PRINT_NORMAL, 0, "MODE 5: FULL TEST OF SYSTEM WITHOUT MOTORS \n");
+	fview(PRINT_NORMAL, 0, "MODE 6: GET STATUS \n");
+	fview(PRINT_NORMAL, 0, "MODE 7: PROGRAM START \n");
 }

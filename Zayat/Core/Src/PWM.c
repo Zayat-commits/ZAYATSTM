@@ -46,31 +46,38 @@
 extern TIM_HandleTypeDef htim2;
 extern UART_HandleTypeDef huart1;
 extern TIM_OC_InitTypeDef sConfigOCZayat;
-
+extern parameters parameter;
 void ARM_Motors(void)
 {
-	sConfigOCZayat.Pulse = 1.2 * ONE_MS;
-   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_1) != HAL_OK)
-   {
-	 Error_Handler();
-   }
-   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_2) != HAL_OK)
-   {
-	 Error_Handler();
-   }
-   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_3) != HAL_OK)
-   {
-	 Error_Handler();
-   }
-   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_4) != HAL_OK)
-   {
-	 Error_Handler();
-   }
-   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
-   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
-
+	u8 buffer[10];
+	do
+	{
+		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+		fview(PRINT_NORMAL, 0, "-----------------------------ARE YOU SURE YOU WANT TO ARM THE MOTORS?-------------------------------------- \n");
+		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+		fview(PRINT_NORMAL, 0, "ARMING IS DONE BY APPLYING 0 % POWER TO MOTORS FOLLOWED BY 0  SPECIFIC TONE (BEEP-BEEP-BEEP)\n");
+		fview(PRINT_NORMAL, 0, "1#: YES\t 2#: NO \n");
+		string_receive(buffer);
+	}while(atoi(buffer) != 1 && atoi(buffer) != 2);
+	switch (atoi(buffer))
+		{
+	case 1:
+		PWM(MIN,1);
+		PWM(MIN,2);
+		PWM(MIN,3);
+		PWM(MIN,4);
+		do
+		{
+			fview(PRINT_NORMAL, 0, "PWM = 100, INSERT 0# AFTER TONE (BEEP-BEEP-BEEP) OR REPLUG/RESET IN CASE OF NO TONE\n");
+			string_receive(buffer);
+		}while(atoi(buffer) != 0);
+		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+		fview(PRINT_NORMAL, 0, "----------------------------------------RECEIVED AND DONE ARMING------------------------------------------- \n");
+		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+	case 2:
+		parameter.ret_flag = 1;
+		break;
+		}
 }
 	/*
 	 *
@@ -131,30 +138,98 @@ void DISARM_Motors(void)
 }
 void vCalibrate_Motors(void)
 {
-	char buffer[50];
-	PWM(MAX,1);
-	PWM(MAX,2);
-	PWM(MAX,3);
-	PWM(MAX,4);
+	u8 buffer[10];
+	do
+	{
+		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+		fview(PRINT_NORMAL, 0, "---------------------------------ARE YOU SURE YOU WANT TO CALIBRATE?---------------------------------------\n");
+		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+		fview(PRINT_NORMAL, 0, "CALIBRATION IS DONE BY APPLYING 100 % POWER TO MOTORS FOLLOWED BY 0 % SEPARATED BY SPECIFIC TONE (BEEP-BEEP)\n");
+		fview(PRINT_NORMAL, 0, "1#: YES\t 2#: NO \n");
+		string_receive(buffer);
+	}while(atoi(buffer) != 1 && atoi(buffer) != 2);
 
-	fview(PRINT_NORMAL, 0, "Enter 0 again after First beep-beep\n");
 
+	if(atoi(buffer) == 1)
+		{
+			PWM(MAX,1);
+			PWM(MAX,2);
+			PWM(MAX,3);
+			PWM(MAX,4);
+			do
+			{
+				fview(PRINT_NORMAL, 0, "PWM = 100, INSERT 0# AFTER FIRST TONE (BEEP-BEEP) OR REPLUG/RESET IN CASE OF NO TONE\n");
+				string_receive(buffer);
+			}while(atoi(buffer) != 0);
+
+			fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+			fview(PRINT_NORMAL, 0, "----------------------------------------------RECEIVED----------------------------------------------------- \n");
+			fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+			PWM(MIN,1);
+			PWM(MIN,2);
+			PWM(MIN,3);
+			PWM(MIN,4);
+			do
+			{
+				fview(PRINT_NORMAL, 0, "PWM = 0, INSERT 0# AFTER SECOND TONE (BEEP-BEEP) OR REPLUG/RESET SYSTEM IN CASE OF NO TONE\n");
+				string_receive(buffer);
+			}while(atoi(buffer) != 0);
+
+			fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+			fview(PRINT_NORMAL, 0, "-------------------------------------RECEIVED AND DONE CALIBRATION----------------------------------------- \n");
+			fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+			parameter.ret_flag = 1;
+		}
+		else if(atoi(buffer) == 2)
+		{
+			parameter.ret_flag = 1;
+		}
+}
+void vdFreeRunPWM(void)
+{
+	s8 buffer[10];
+	//insert:
+	fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+	fview(PRINT_NORMAL, 0, "----------------------------------FREE CONTROL OF MOTOR SPEEDS UI------------------------------------------ \n");
+	fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+	fview(PRINT_NORMAL, 0, "TO RETURN TO PREVIOUS MENU INSERT -1#\n");
+	fview(PRINT_NORMAL, 0, "OTHERWISE, THE PWM RANGES FROM 0# ~ 100#. INSERT HERE: ");
 	string_receive(buffer);
+	while(atoi(buffer) > 100 || atoi(buffer) < -1)
+	{
+		fview(PRINT_NORMAL, 0, "INSERT CORRECT NUMBER: ");
+		string_receive(buffer);
 
-	while(atoi(buffer)!= 0);
+	}
+	if(atoi(buffer) == -1)
+	{
+		parameter.ret_flag = 1;
 
-	fview(PRINT_NORMAL, 0, "Received\n");
+	}
+	else
+	{
+		int speed = atoi(buffer);
+		fview(PRINT_INT_NO_TAB, speed, "Dutycycle ");
+		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+		fview(PRINT_NORMAL, 0, "INSERT 1# TO CONTINUE OR 0# TO INSERT ANOTHER VALUE, -1# TO RETURN TO PREVIOUS MENU \n");
+		string_receive(buffer);
+		s8 temp = atoi(buffer);
+		while(temp != 0 && temp != -1 && temp != 1)
+		{
+			fview(PRINT_NORMAL, 0, "\nINSERT CORRECT NUMBER:\r ");
+			string_receive(buffer);
 
-	PWM(MIN,1);
-	PWM(MIN,2);
-	PWM(MIN,3);
-	PWM(MIN,4);
+		}
+		switch (atoi(buffer))
+		{
+		case 0:
+			//goto insert;
+		case 1:
+			PWM(atoi(buffer), 1);
+			PWM(atoi(buffer), 2);
+			PWM(atoi(buffer), 3);
+			PWM(atoi(buffer), 4);
+		}
+	}
 
-	fview(PRINT_NORMAL, 0, "Enter 0 again after First beep-beep\n");
-
-	string_receive(buffer);
-
-	while(atoi(buffer)!= 0);
-
-	fview(PRINT_NORMAL, 0, "Received\n");
 }
