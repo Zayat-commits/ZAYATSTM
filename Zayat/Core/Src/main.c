@@ -644,7 +644,7 @@ void DroneStart(void *argument)
 	}
 	else
 	{	/*should set task to lower priority*/
-		osDelay(20);
+		osDelay(2000);
 	}
   }
   /* USER CODE END DroneStart */
