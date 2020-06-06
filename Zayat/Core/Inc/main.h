@@ -71,6 +71,14 @@ extern "C" {
 #define MODE_6	6
 #define MODE_7	7
 
+#define MOTOR1	1
+#define MOTOR2	2
+#define MOTOR3	3
+#define MOTOR4	4
+
+#define HOVER 40
+#define PWM_ON 1
+#define PWM_OFF 0
 /* USER CODE END EM */
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);

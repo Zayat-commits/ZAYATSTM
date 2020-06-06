@@ -50,12 +50,13 @@ extern parameters parameter;
 void ARM_Motors(void)
 {
 	u8 buffer[10];
+
+	fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+	fview(PRINT_NORMAL, 0, "-----------------------------ARE YOU SURE YOU WANT TO ARM THE MOTORS?-------------------------------------- \n \n");
+	fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+	fview(PRINT_NORMAL, 0, "ARMING IS DONE BY APPLYING 0 % POWER TO MOTORS FOLLOWED BY 0  SPECIFIC TONE (BEEP-BEEP-BEEP)\n");
 	do
 	{
-		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
-		fview(PRINT_NORMAL, 0, "-----------------------------ARE YOU SURE YOU WANT TO ARM THE MOTORS?-------------------------------------- \n");
-		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
-		fview(PRINT_NORMAL, 0, "ARMING IS DONE BY APPLYING 0 % POWER TO MOTORS FOLLOWED BY 0  SPECIFIC TONE (BEEP-BEEP-BEEP)\n");
 		fview(PRINT_NORMAL, 0, "1#: YES\t 2#: NO \n");
 		string_receive(buffer);
 	}while(atoi(buffer) != 1 && atoi(buffer) != 2);
@@ -66,14 +67,15 @@ void ARM_Motors(void)
 		PWM(MIN,2);
 		PWM(MIN,3);
 		PWM(MIN,4);
+		parameter.pwm_status = PWM_ON;
 		do
 		{
-			fview(PRINT_NORMAL, 0, "PWM = 100, INSERT 0# AFTER TONE (BEEP-BEEP-BEEP) OR REPLUG/RESET IN CASE OF NO TONE\n");
+			fview(PRINT_NORMAL, 0, "PWM = 0, INSERT 0# AFTER TONE (BEEP-BEEP-BEEP) OR REPLUG/RESET IN CASE OF NO TONE\n");
 			string_receive(buffer);
 		}while(atoi(buffer) != 0);
-		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
 		fview(PRINT_NORMAL, 0, "----------------------------------------RECEIVED AND DONE ARMING------------------------------------------- \n");
 		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+		parameter.ret_flag = 1;
 	case 2:
 		parameter.ret_flag = 1;
 		break;
@@ -90,9 +92,12 @@ void ARM_Motors(void)
 	 */
 void PWM(f32 dutyCycle, u8 motorNumber)
 {
-	f32 temp = dutyCycle * ONE_MS / 100 + ONE_MS;
+	f32 temp = dutyCycle * ONE_MS / 100.0 + ONE_MS;
 	sConfigOCZayat.Pulse = (uint32_t) temp;
-
+	if(motorNumber == 1)parameter.motor1 = temp;
+	if(motorNumber == 2)parameter.motor2 = temp;
+	if(motorNumber == 3)parameter.motor3 = temp;
+	if(motorNumber == 4)parameter.motor4 = temp;
 	switch(motorNumber)
 	{
 	case 1:
@@ -162,9 +167,7 @@ void vCalibrate_Motors(void)
 				string_receive(buffer);
 			}while(atoi(buffer) != 0);
 
-			fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
-			fview(PRINT_NORMAL, 0, "----------------------------------------------RECEIVED----------------------------------------------------- \n");
-			fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+			fview(PRINT_NORMAL, 0, "----------------------------------------------RECEIVED----------------------------------------------------- \n \n");
 			PWM(MIN,1);
 			PWM(MIN,2);
 			PWM(MIN,3);
@@ -175,9 +178,7 @@ void vCalibrate_Motors(void)
 				string_receive(buffer);
 			}while(atoi(buffer) != 0);
 
-			fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
-			fview(PRINT_NORMAL, 0, "-------------------------------------RECEIVED AND DONE CALIBRATION----------------------------------------- \n");
-			fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
+			fview(PRINT_NORMAL, 0, "-------------------------------------RECEIVED AND DONE CALIBRATION----------------------------------------- \n \n \n \n \n \n");
 			parameter.ret_flag = 1;
 		}
 		else if(atoi(buffer) == 2)
@@ -188,48 +189,54 @@ void vCalibrate_Motors(void)
 void vdFreeRunPWM(void)
 {
 	s8 buffer[10];
-	//insert:
-	fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
-	fview(PRINT_NORMAL, 0, "----------------------------------FREE CONTROL OF MOTOR SPEEDS UI------------------------------------------ \n");
-	fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
-	fview(PRINT_NORMAL, 0, "TO RETURN TO PREVIOUS MENU INSERT -1#\n");
-	fview(PRINT_NORMAL, 0, "OTHERWISE, THE PWM RANGES FROM 0# ~ 100#. INSERT HERE: ");
-	string_receive(buffer);
-	while(atoi(buffer) > 100 || atoi(buffer) < -1)
+	while(parameter.ret_flag == 0)
 	{
-		fview(PRINT_NORMAL, 0, "INSERT CORRECT NUMBER: ");
-		string_receive(buffer);
+		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+		fview(PRINT_NORMAL, 0, "----------------------------------FREE CONTROL OF MOTOR SPEEDS UI------------------------------------------ \n \n");
+		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+		insert:
 
-	}
-	if(atoi(buffer) == -1)
-	{
-		parameter.ret_flag = 1;
-
-	}
-	else
-	{
-		int speed = atoi(buffer);
-		fview(PRINT_INT_NO_TAB, speed, "Dutycycle ");
-		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n");
-		fview(PRINT_NORMAL, 0, "INSERT 1# TO CONTINUE OR 0# TO INSERT ANOTHER VALUE, -1# TO RETURN TO PREVIOUS MENU \n");
+		fview(PRINT_NORMAL, 0, "TO RETURN TO PREVIOUS MENU INSERT -1#\n");
+		fview(PRINT_NORMAL, 0, "OTHERWISE, THE PWM RANGES FROM 0# ~ 100#. INSERT HERE: ");
 		string_receive(buffer);
-		s8 temp = atoi(buffer);
-		while(temp != 0 && temp != -1 && temp != 1)
+		while(atoi(buffer) > 100 || atoi(buffer) < -1)
 		{
-			fview(PRINT_NORMAL, 0, "\nINSERT CORRECT NUMBER:\r ");
+			fview(PRINT_NORMAL, 0, "\nINSERT CORRECT NUMBER: ");
 			string_receive(buffer);
 
 		}
-		switch (atoi(buffer))
+		if(atoi(buffer) == -1)
 		{
-		case 0:
-			//goto insert;
-		case 1:
-			PWM(atoi(buffer), 1);
-			PWM(atoi(buffer), 2);
-			PWM(atoi(buffer), 3);
-			PWM(atoi(buffer), 4);
+			parameter.ret_flag = 1;
+
+		}
+		else
+		{
+			int speed = atoi(buffer);
+			fview(PRINT_INT_NO_TAB, speed, "\t ");
+			fview(PRINT_NORMAL, 0, "----------------------------------------------------------------------------------------------------------- \n \n");
+			fview(PRINT_NORMAL, 0, "INSERT 1# TO CONTINUE, 0# TO INSERT ANOTHER VALUE OR -1# TO RETURN TO PREVIOUS MENU \n");
+			string_receive(buffer);
+			s8 temp = atoi(buffer);
+			while(temp != 0 && temp != -1 && temp != 1)
+			{
+				fview(PRINT_NORMAL, 0, "\nINSERT CORRECT NUMBER:\r ");
+				string_receive(buffer);
+
+			}
+			switch (atoi(buffer))
+			{
+			case 0:
+				goto insert;
+			case 1:
+				PWM(atoi(buffer), 1);
+				PWM(atoi(buffer), 2);
+				PWM(atoi(buffer), 3);
+				PWM(atoi(buffer), 4);
+				parameter.pwm_status = PWM_ON;
+				fview(PRINT_NORMAL, 0, "----------------------------------------------RECEIVED----------------------------------------------------- \n \n \n");
+
+			}
 		}
 	}
-
 }

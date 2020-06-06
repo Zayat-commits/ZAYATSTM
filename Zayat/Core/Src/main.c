@@ -174,11 +174,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
   vInitPARAMETERS(&parameter);
   //HAL_Delay(150);
-  //MPU_Init(p, INTEGRAL_DT);
-  //Compass_Init();
-  //init_EKF();
+  MPU_Init(p, INTEGRAL_DT);
+  Compass_Init();
+  init_EKF();
 
-  //gps_init();
+  gps_init();
 
   /* USER CODE END 2 */
 
@@ -203,28 +203,28 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of BODY_RATES */
-//  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
+  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
 
   /* creation of DRONE_START */
   DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
 
   /* creation of IMU */
-//  IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
-//
-//  /* creation of OUTPUT_THRUST */
-//  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
-//
-//  /* creation of ROLL_PITCH */
-//  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
-//
-//  /* creation of YAW */
-//  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
-//
-//  /* creation of ALTITUDE_CONTRO */
-//  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
-//
-//  /* creation of LATERAL_CONTROL */
-//  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+  IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
+
+  /* creation of OUTPUT_THRUST */
+  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
+
+  /* creation of ROLL_PITCH */
+  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
+
+  /* creation of YAW */
+  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
+
+  /* creation of ALTITUDE_CONTRO */
+  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
+
+  /* creation of LATERAL_CONTROL */
+  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -437,7 +437,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 9600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -562,7 +562,6 @@ void BodyRate(void *argument)
 /* USER CODE END Header_DroneStart */
 void DroneStart(void *argument)
 {
-
   /* USER CODE BEGIN DroneStart */
 	char buffer[10];
   /* Infinite loop */
@@ -587,21 +586,32 @@ void DroneStart(void *argument)
 		vdFreeRunPWM();
 		break;
 	case MODE_3:
-
+		fview(PRINT_INT_NO_TAB, HOVER, "SETTING PWM TO: ");
+		parameter.pwm_status = PWM_ON;
+		PWM(HOVER, MOTOR1);
+		PWM(HOVER, MOTOR2);
+		PWM(HOVER, MOTOR3);
+		PWM(HOVER, MOTOR4);
 		break;
 	case MODE_4:
-
+		/*GIVE PRIORITY TO FIRST BLOCK AND LOWER PRIORITY OF THIS FUNTION*/
+		parameter.pwm_status = PWM_ON;
+		/*INSERT TARGET COMMANDS*/
+		vdDroneStartBlock(argument);
+		//osThreadSetPriority(DRONE_STARTHandle, osPriorityBelowNormal);
 		break;
 	case MODE_5:
-
+		/*GIVE PRIORITY TO FIRST BLOCK AND LOWER PRIORITY OF THIS FUNTION, NO PWM GENERATED*/
 		break;
 	case MODE_6:
+		/*PRINT ALL PWM, COORDINATES, ORIENTATION, NEXT TASK AND COMMANDED TASK*/
+		break;
+	case 7:
 
 		break;
 	default:
 		parameter.ret_flag = 1;
 		}
-	//vdDroneStartBlock(argument);
 	if(parameter.ret_flag == 1)
 	{
 		parameter.ret_flag = 0;

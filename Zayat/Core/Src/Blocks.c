@@ -24,20 +24,325 @@ void vdBodyRatesBlock(parameters* ptr)
 
 void vdDroneStartBlock(parameters* ptr)
 {
-	u8 buffer[25];
+	s8 buffer[25];
+	menu:
+	fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+	fview(PRINT_NORMAL, 0, "----------------------------------------DRONE TESTING PLATFORM----------------------------------------------\n \n");
+	fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+	fview(PRINT_NORMAL, 0, "TO INSERT PARAMETER VALUES INTO THE DRONE: FOLLOW THE GUIDE BELOW\n \n");
+	do
+	{
+		fview(PRINT_NORMAL, 0, "FOR TARGET X Y Z: INSERT 0\n");
+		fview(PRINT_NORMAL, 0, "FOR TARGET X Y Z VELOCITIES: INSERT 1\n");
+		fview(PRINT_NORMAL, 0, "FOR TARGET PSI: INSERT 2\n");
+		fview(PRINT_NORMAL, 0, "TO RETURN TO PREVIOUS MENU INSERT 3\r\n ");
+		string_receive(buffer);
+	}while(atoi(buffer) < 0 || atoi(buffer) > 3);
+	volatile int temp = atoi(buffer);
 
-	fview(PRINT_NORMAL, 0, "Insert Psi Commanded or -1 to stop \n");
-	string_receive(buffer);
-	if(atoi(buffer) == -1)
+	if(temp == 0)
 	{
-		PWM(0, 1);
-		PWM(0, 2);
-		PWM(0, 3);
-		PWM(0, 4);
+		insertx:
+		fview(PRINT_NORMAL, 0, "INSERT TARGET X (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
+		string_receive(buffer);
+		if (strcmp((char*)buffer,"exit") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)
+				{
+					ptr->ret_flag = 1;
+
+				}
+			else
+				{
+					goto insertx;
+				}
+		}
+		else if(strcmp((char*)buffer,"return") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)goto menu;
+			if(strcmp(buffer, "2") ==0)goto insertx;
+		}
+		else
+		{
+			do
+				{
+					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
+					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "2") ==0)goto insertx;
+			if(strcmp(buffer, "1") ==0)ptr->x_cmd = atoi(buffer);
+		}
+
+		inserty:
+		fview(PRINT_NORMAL, 0, "INSERT TARGET Y (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
+		string_receive(buffer);
+		if (strcmp((char*)buffer,"exit") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)
+				{
+					ptr->ret_flag = 1;
+
+				}
+			else
+				{
+					goto inserty;
+				}
+		}
+		else if(strcmp((char*)buffer,"return") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)goto menu;
+			if(strcmp(buffer, "2") ==0)goto inserty;
+		}
+		else
+		{
+			do
+				{
+					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
+					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "2") ==0)goto inserty;
+			if(strcmp(buffer, "1") ==0)ptr->y_cmd = atoi(buffer);
+		}
+
+		insertz:
+		fview(PRINT_NORMAL, 0, "INSERT TARGET Z (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
+		string_receive(buffer);
+		if (strcmp((char*)buffer,"exit") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)
+				{
+					ptr->ret_flag = 1;
+
+				}
+			else
+				{
+					goto insertz;
+				}
+		}
+		else if(strcmp((char*)buffer,"return") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)goto menu;
+			if(strcmp(buffer, "2") ==0)goto insertz;
+		}
+		else
+		{
+			do
+				{
+					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
+					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "2") ==0)goto insertz;
+			if(strcmp(buffer, "1") ==0)ptr->z_cmd = atoi(buffer);
+		}
 	}
-	else
+	else if(temp == 1)
 	{
-		ptr->psi_cmd = atoi(buffer)/1.0f;
+		insertxx:
+		fview(PRINT_NORMAL, 0, "INSERT TARGET X VELOCITY (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
+		string_receive(buffer);
+		if (strcmp((char*)buffer,"exit") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)
+				{
+					ptr->ret_flag = 1;
+
+				}
+			else
+				{
+					goto insertxx;
+				}
+		}
+		else if(strcmp((char*)buffer,"return") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)goto menu;
+			if(strcmp(buffer, "2") ==0)goto insertxx;
+		}
+		else
+		{
+			do
+				{
+					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
+					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "2") ==0)goto insertxx;
+			if(strcmp(buffer, "1") ==0)ptr->x_dot_cmd = atoi(buffer);
+		}
+
+		insertyy:
+		fview(PRINT_NORMAL, 0, "INSERT TARGET Y VELOCITY (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
+		string_receive(buffer);
+		if (strcmp((char*)buffer,"exit") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)
+				{
+					ptr->ret_flag = 1;
+
+				}
+			else
+				{
+					goto insertyy;
+				}
+		}
+		else if(strcmp((char*)buffer,"return") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)goto menu;
+			if(strcmp(buffer, "2") ==0)goto insertyy;
+		}
+		else
+		{
+			do
+				{
+					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
+					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "2") ==0)goto insertyy;
+			if(strcmp(buffer, "1") ==0)ptr->y_dot_cmd = atoi(buffer);
+		}
+
+		insertzz:
+		fview(PRINT_NORMAL, 0, "INSERT TARGET Z VELOCITY (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
+		string_receive(buffer);
+		if (strcmp((char*)buffer,"exit") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)
+				{
+					ptr->ret_flag = 1;
+
+				}
+			else
+				{
+					goto insertzz;
+				}
+		}
+		else if(strcmp((char*)buffer,"return") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)goto menu;
+			if(strcmp(buffer, "2") ==0)goto insertzz;
+		}
+		else
+		{
+			do
+				{
+					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
+					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "2") ==0)goto insertzz;
+			if(strcmp(buffer, "1") ==0)ptr->z_dot_cmd = atoi(buffer);
+		}
+	}
+	else if(temp ==2)
+	{
+		insertpsi:
+		fview(PRINT_NORMAL, 0, "INSERT TARGET PSI (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
+		string_receive(buffer);
+		if (strcmp((char*)buffer,"exit") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)
+				{
+					ptr->ret_flag = 1;
+
+				}
+			else
+				{
+					goto insertpsi;
+				}
+		}
+		else if(strcmp((char*)buffer,"return") == 0)
+		{
+			do
+				{
+					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "1") ==0)goto menu;
+			if(strcmp(buffer, "2") ==0)goto insertpsi;
+		}
+		else
+		{
+			do
+				{
+					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
+					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
+					string_receive(buffer);
+				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+			if(strcmp(buffer, "2") ==0)goto insertpsi;
+			if(strcmp(buffer, "1") ==0)ptr->psi_cmd = atoi(buffer);
+		}
+	}
+	else if(temp ==3)
+	{
+		ptr->ret_flag = 1;
 	}
 
 }
@@ -178,7 +483,7 @@ void string_receive(u8* buffer)
 {
 	int i = 0;
 	HAL_UART_Receive(&huart1, &buffer[i], 1, HAL_MAX_DELAY);
-	while(buffer[i]!='#')
+	while(buffer[i]!='\n')
 	{
 		i++;
 		HAL_UART_Receive(&huart1, &buffer[i], 1, HAL_MAX_DELAY);
@@ -208,14 +513,16 @@ void vInitPARAMETERS(parameters *ptr)
 	ptr->cmd_thrust[1] = 0;
 	ptr->cmd_thrust[2] = 0;
 	ptr->cmd_thrust[3] = 0;
+	ptr->motor1 = ptr->motor2 = ptr->motor3 = ptr->motor4 = 0;
+	ptr->pwm_status = PWM_OFF;
 	ptr-> phib=ptr-> thetab=ptr-> psib=0;
 }
 
 void vdUserInterface(void)
 {
-	fview(PRINT_NORMAL, 0, "#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*##*#*#*#*#*#*#*#**#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*\n");
-	fview(PRINT_NORMAL, 0, "#*----------------------------------RAVEN5 DRONE USER INTERFACE-------------------------------------------#*\n");
-	fview(PRINT_NORMAL, 0, "#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*\n");
+	fview(PRINT_NORMAL, 0, "+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*++*+*+*+*+*+*+*+**+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*\n \n");
+	fview(PRINT_NORMAL, 0, "+*----------------------------------RAVEN5 DRONE USER INTERFACE-------------------------------------------+*\n \n");
+	fview(PRINT_NORMAL, 0, "+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*\n \n");
 	fview(PRINT_NORMAL, 0, "SELECT MODE OF OPERATION BY INSERTING MODE NUMBER:\n");
 	fview(PRINT_NORMAL, 0, "MODE 0: CALIBRATION OF MOTORS \n");
 	fview(PRINT_NORMAL, 0, "MODE 1: NORMAL START OF MOTORS \n");
