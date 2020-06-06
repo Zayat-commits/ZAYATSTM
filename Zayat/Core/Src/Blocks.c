@@ -151,7 +151,8 @@ void vdPrintBlock(parameters* ptr)
 
 void vdInsertBlock(parameters* ptr)
 {
-	/*USER CODE HERE*/
+	uint8_t buffer[25];
+	uint8_t ok[] = {"OK"};
 }
 
 void vdOutputBlock(parameters* ptr)
@@ -194,8 +195,8 @@ void vdRollPitchBlock(parameters* ptr)
 	f32 R31 = 0;
 	f32 R32 = sin(ptr->phi*DEG_TO_RAD) / cos(ptr->theta*DEG_TO_RAD);
 	f32 R33 = cos(ptr->phi*DEG_TO_RAD) / cos(ptr->theta*DEG_TO_RAD);
-	f32 R13_cmd= ptr->x_dot_dot_cmd*m/ptr->u1;
-	f32 R23_cmd= ptr->y_dot_dot_cmd*m/ptr->u1;
+	f32 R13_cmd= ptr->x_dot_dot_cmd*mass/ptr->u1;
+	f32 R23_cmd= ptr->y_dot_dot_cmd*mass/ptr->u1;
 	b_x_dot_cmd= (R13-R13_cmd)/taw;
 	b_y_dot_cmd= (R23-R23_cmd)/taw;
 	ptr->p_cmd = 1/R33 * (R21*b_x_dot_cmd - R11*b_y_dot_cmd);
@@ -211,7 +212,7 @@ void vdAltitudeBlock(parameters* ptr)
 {
 	f32 R33 = cos(ptr->phi*DEG_TO_RAD)/cos(ptr->theta*DEG_TO_RAD);
 	ptr->z_dot_dot_cmd= kp_z*(ptr->z_cmd- ptr->z) + kd_z*(ptr->z_dot_cmd-ptr->z_dot);
-	ptr->u1 = m * (ptr->z_dot_dot_cmd - g)/R33;
+	ptr->u1 = mass * (ptr->z_dot_dot_cmd - g)/R33;
 }
 
 void vdLateralBlock(parameters* ptr)
