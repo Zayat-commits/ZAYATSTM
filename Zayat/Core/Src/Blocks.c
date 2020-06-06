@@ -25,7 +25,11 @@ void vdBodyRatesBlock(parameters* ptr)
 void vdDroneStartBlock(parameters* ptr)
 {
 	s8 buffer[25];
+	s8 coordinates[][3] = {{"X"},{"Y"},{"Z"}};
+	s8 velocities[][15] = {{"X VELOCITY"},{"Y VELOCITY"},{"Z VELOCITY"}};
+	u8 next;
 	menu:
+	next = 0;
 	fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
 	fview(PRINT_NORMAL, 0, "----------------------------------------DRONE TESTING PLATFORM----------------------------------------------\n \n");
 	fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
@@ -36,315 +40,80 @@ void vdDroneStartBlock(parameters* ptr)
 		fview(PRINT_NORMAL, 0, "FOR TARGET X Y Z VELOCITIES: INSERT 1\n");
 		fview(PRINT_NORMAL, 0, "FOR TARGET PSI: INSERT 2\n");
 		fview(PRINT_NORMAL, 0, "TO RETURN TO PREVIOUS MENU INSERT 3\r\n ");
-		string_receive(buffer);
+		string_receive((u8*)buffer);
 	}while(atoi(buffer) < 0 || atoi(buffer) > 3);
 	volatile int temp = atoi(buffer);
 
-	if(temp == 0)
+	switch(temp)
 	{
-		insertx:
-		fview(PRINT_NORMAL, 0, "INSERT TARGET X (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
-		string_receive(buffer);
-		if (strcmp((char*)buffer,"exit") == 0)
-		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)
-				{
-					ptr->ret_flag = 1;
-
-				}
-			else
-				{
-					goto insertx;
-				}
-		}
-		else if(strcmp((char*)buffer,"return") == 0)
-		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)goto menu;
-			if(strcmp(buffer, "2") ==0)goto insertx;
-		}
-		else
-		{
-			do
-				{
-					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
-					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "2") ==0)goto insertx;
-			if(strcmp(buffer, "1") ==0)ptr->x_cmd = atoi(buffer);
-		}
-
-		inserty:
-		fview(PRINT_NORMAL, 0, "INSERT TARGET Y (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
-		string_receive(buffer);
-		if (strcmp((char*)buffer,"exit") == 0)
-		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)
-				{
-					ptr->ret_flag = 1;
-
-				}
-			else
-				{
-					goto inserty;
-				}
-		}
-		else if(strcmp((char*)buffer,"return") == 0)
-		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)goto menu;
-			if(strcmp(buffer, "2") ==0)goto inserty;
-		}
-		else
-		{
-			do
-				{
-					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
-					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "2") ==0)goto inserty;
-			if(strcmp(buffer, "1") ==0)ptr->y_cmd = atoi(buffer);
-		}
-
-		insertz:
-		fview(PRINT_NORMAL, 0, "INSERT TARGET Z (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
-		string_receive(buffer);
-		if (strcmp((char*)buffer,"exit") == 0)
-		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)
-				{
-					ptr->ret_flag = 1;
-
-				}
-			else
-				{
-					goto insertz;
-				}
-		}
-		else if(strcmp((char*)buffer,"return") == 0)
-		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)goto menu;
-			if(strcmp(buffer, "2") ==0)goto insertz;
-		}
-		else
-		{
-			do
-				{
-					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
-					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "2") ==0)goto insertz;
-			if(strcmp(buffer, "1") ==0)ptr->z_cmd = atoi(buffer);
-		}
-	}
-	else if(temp == 1)
+	case 0:
 	{
-		insertxx:
-		fview(PRINT_NORMAL, 0, "INSERT TARGET X VELOCITY (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
-		string_receive(buffer);
-		if (strcmp((char*)buffer,"exit") == 0)
+		switchzayat:
+		switch (u8TestUserInterface(coordinates[next], ptr))
 		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)
-				{
-					ptr->ret_flag = 1;
-
-				}
-			else
-				{
-					goto insertxx;
-				}
+			case 0:
+			{
+				break;
+			}
+			case 1:
+			{
+				goto menu;
+			}
+			case 2:
+			{
+				next++;
+				if(next > 2)break;
+				goto switchzayat;
+			}
 		}
-		else if(strcmp((char*)buffer,"return") == 0)
-		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)goto menu;
-			if(strcmp(buffer, "2") ==0)goto insertxx;
-		}
-		else
-		{
-			do
-				{
-					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
-					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "2") ==0)goto insertxx;
-			if(strcmp(buffer, "1") ==0)ptr->x_dot_cmd = atoi(buffer);
-		}
-
-		insertyy:
-		fview(PRINT_NORMAL, 0, "INSERT TARGET Y VELOCITY (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
-		string_receive(buffer);
-		if (strcmp((char*)buffer,"exit") == 0)
-		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)
-				{
-					ptr->ret_flag = 1;
-
-				}
-			else
-				{
-					goto insertyy;
-				}
-		}
-		else if(strcmp((char*)buffer,"return") == 0)
-		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)goto menu;
-			if(strcmp(buffer, "2") ==0)goto insertyy;
-		}
-		else
-		{
-			do
-				{
-					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
-					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "2") ==0)goto insertyy;
-			if(strcmp(buffer, "1") ==0)ptr->y_dot_cmd = atoi(buffer);
-		}
-
-		insertzz:
-		fview(PRINT_NORMAL, 0, "INSERT TARGET Z VELOCITY (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
-		string_receive(buffer);
-		if (strcmp((char*)buffer,"exit") == 0)
-		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)
-				{
-					ptr->ret_flag = 1;
-
-				}
-			else
-				{
-					goto insertzz;
-				}
-		}
-		else if(strcmp((char*)buffer,"return") == 0)
-		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)goto menu;
-			if(strcmp(buffer, "2") ==0)goto insertzz;
-		}
-		else
-		{
-			do
-				{
-					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
-					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "2") ==0)goto insertzz;
-			if(strcmp(buffer, "1") ==0)ptr->z_dot_cmd = atoi(buffer);
-		}
+		next = 0;
+		break;
 	}
-	else if(temp ==2)
+	case 1:
 	{
-		insertpsi:
-		fview(PRINT_NORMAL, 0, "INSERT TARGET PSI (0 ~ 255), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n");
-		string_receive(buffer);
-		if (strcmp((char*)buffer,"exit") == 0)
+		switchzayat1:
+		switch (u8TestUserInterface(velocities[next], ptr))
 		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)
-				{
-					ptr->ret_flag = 1;
-
-				}
-			else
-				{
-					goto insertpsi;
-				}
+			case 0:
+			{
+				break;
+			}
+			case 1:
+			{
+				goto menu;
+			}
+			case 2:
+			{
+				next++;
+				if(next > 2)break;
+				goto switchzayat1;
+			}
 		}
-		else if(strcmp((char*)buffer,"return") == 0)
-		{
-			do
-				{
-					fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "1") ==0)goto menu;
-			if(strcmp(buffer, "2") ==0)goto insertpsi;
-		}
-		else
-		{
-			do
-				{
-					fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
-					fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
-					string_receive(buffer);
-				}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-			if(strcmp(buffer, "2") ==0)goto insertpsi;
-			if(strcmp(buffer, "1") ==0)ptr->psi_cmd = atoi(buffer);
-		}
+		break;
 	}
-	else if(temp ==3)
+	case 2:
+	{
+		switch (u8TestUserInterface("PSI", ptr))
+		{
+			case 0:
+			{
+				break;
+			}
+			case 1:
+			{
+				goto menu;
+			}
+			case 2:
+				break;
+		}
+		break;
+	}
+	case 3:
 	{
 		ptr->ret_flag = 1;
+		break;
 	}
-
+}
 }
 void vdMPUBlock(parameters* ptr)
 {
@@ -382,8 +151,7 @@ void vdPrintBlock(parameters* ptr)
 
 void vdInsertBlock(parameters* ptr)
 {
-	uint8_t buffer[25];
-	uint8_t ok[] = {"OK"};
+	/*USER CODE HERE*/
 }
 
 void vdOutputBlock(parameters* ptr)
@@ -453,7 +221,7 @@ void vdLateralBlock(parameters* ptr)
 }
 void fview(uint8_t type, float argument, char * line)
 {
-	uint8_t buffer[100];
+	uint8_t buffer[150];
 //	  __HAL_UNLOCK(&huart1);
 	if(type == PRINT_FLOAT_NO_TAB || type == PRINT_FLOAT_WITH_TAB)						//0 for printing variables, else for simple print
 	{
@@ -532,4 +300,53 @@ void vdUserInterface(void)
 	fview(PRINT_NORMAL, 0, "MODE 5: FULL TEST OF SYSTEM WITHOUT MOTORS \n");
 	fview(PRINT_NORMAL, 0, "MODE 6: GET STATUS \n");
 	fview(PRINT_NORMAL, 0, "MODE 7: PROGRAM START \n");
+}
+u8 u8TestUserInterface(const char* line,parameters* ptr )		/*returns value of what the user wants to do: Insert, Return or Exit*/
+{
+	s8 buffer1[150];
+	s8 buffer[25];
+	sprintf(buffer1,"INSERT TARGET %s (-128 ~ 127), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n", line);
+	insert:
+	fview(PRINT_NORMAL, 0, buffer1);
+	string_receive((u8*)buffer);
+	if (strcmp((char*)buffer,"exit") == 0)
+	{
+		do
+			{
+				fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
+				string_receive((u8*)buffer);
+			}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+		if(strcmp(buffer, "1") ==0)
+			{
+				ptr->ret_flag = 1;
+				return 0;
+			}
+		else
+			{
+				goto insert;
+			}
+	}
+	else if(strcmp((char*)buffer,"return") == 0)
+	{
+		do
+			{
+				fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
+				string_receive((u8*)buffer);
+			}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+		if(strcmp(buffer, "1") ==0)return 1;
+		if(strcmp(buffer, "2") ==0)goto insert;
+	}
+	else
+	{
+		do
+			{
+				fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
+				fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
+				string_receive((u8*)buffer);
+			}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
+		if(strcmp(buffer, "2") ==0)goto insert;
+		if(strcmp(buffer, "1") ==0)ptr->x_cmd = atoi(buffer);
+		return 2;
+	}
+
 }

@@ -32,4 +32,5 @@ void fview(uint8_t type, float argument, char * line);
 void string_receive(u8* buffer);
 void vInitPARAMETERS(parameters *ptr);
 void vdUserInterface(void);
+u8 u8TestUserInterface(const char* line,parameters* ptr);
 #endif /* INC_BLOCKS_H_ */
