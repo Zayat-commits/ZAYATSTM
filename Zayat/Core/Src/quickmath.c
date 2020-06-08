@@ -134,7 +134,7 @@ float determinant(float a[6][6], int k)
 }
 void cofactor(float num[6][6], int f)
 {
- float b[6][6], fac[6][6];
+ float b[6][6], fac[6][6], x;
  int p, q, m, n, i, j;
  for (q = 0;q < f; q++)
  {
@@ -159,10 +159,13 @@ void cofactor(float num[6][6], int f)
             }
         }
       }
-      fac[q][p] = pow(-1, q + p) * determinant(b, f - 1);
+     	 x = determinant(b, f - 1);
+     	if (x == 0)
+     		x = 0.01;
+      fac[q][p] = pow(-1, q + p) * x;
     }
   }
-  transpose(num, fac, f);
+transpose(num, fac, f);
 }
 
 void transpose(float num[6][6], float fac[6][6], int r)
@@ -178,6 +181,8 @@ void transpose(float num[6][6], float fac[6][6], int r)
         }
     }
   d = determinant(num, r);
+  if (d==0)
+	  d = 0.01;
   for (i = 0;i < r; i++)
     {
      for (j = 0;j < r; j++)

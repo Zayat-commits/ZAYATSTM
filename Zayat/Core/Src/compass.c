@@ -101,8 +101,6 @@ HAL_Delay(100);
 void Read_Compass_Values(parameters *body)
 {
 HAL_StatusTypeDef ret;
-
-
 //	ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
 //	while(ret !=HAL_OK)
 //	{

@@ -41,7 +41,7 @@ extern I2C_HandleTypeDef hi2c1;
 
 	u8 buf[10];
 
-void MPU_Init(parameters *p, f32 RT)
+void MPU_Init(parameters *p, const f32 RT)
 {
 	RT=0.01;
 	HAL_Delay(150);
@@ -195,7 +195,7 @@ void Read_Accel_Values(parameters *p)
 
 }
 
-void Read_Gyro_Values(parameters *p, f32 RT)
+void Read_Gyro_Values(parameters *p, const f32 RT)
 {
 
 		RT=0.01;
@@ -244,7 +244,7 @@ void Read_Gyro_Values(parameters *p, f32 RT)
 
 }
 
-void imu_Comp_Filter(parameters *p, f32 RT)
+void imu_Comp_Filter(parameters *p, const f32 RT)
 {
 	RT=0.01;
 
@@ -317,6 +317,6 @@ void imu_Comp_Filter(parameters *p, f32 RT)
 	p->y_dot_dot = acc[1];
 	p->z_dot_dot = acc[2];
 
-
+	predict(p);
 }
 

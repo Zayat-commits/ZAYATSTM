@@ -5,8 +5,8 @@
  *      Author: Khaled Ali
  */
 #include "main.h"
-
-f32 ekfcov[7][7], hprimegps[6][7], hprimeMag[7] = {0},  R_GPS[6][6],Q_load[7][7], R_mag, dt = 0.001,inverse[6][6], toinvert[6][6], K[7][6], gprime[7][7] = {0};
+extern parameters parameter;
+f32 ekfcov[7][7], hprimegps[6][7], hprimegpsT[7][6], hprimeMag[7] = {0},  R_GPS[6][6],Q_load[7][7], R_mag, dt = 0.001,inverse[6][6], toinvert[6][6], K[7][6], gprime[7][7] = {0};
 f32 z[6][1], zfromX[6];
 accel distance;
 accel speed;
@@ -33,7 +33,7 @@ void init_EKF(void)
 	ekfcov[6][6] = 0.0025;
 	R_GPS[0][0] = 1;
 	R_GPS[1][1] = 1;
-	R_GPS[2][2] = 90000; //we'll see
+	R_GPS[2][2] = 100; //we'll see
 	R_GPS[3][3] = 0.01;
 	R_GPS[4][4] = 0.01;
 	R_GPS[5][5] = 0.09;
@@ -45,6 +45,7 @@ void init_EKF(void)
 	Q_load[5][5] = 0.01 * dt;
 	Q_load[6][6] = 0.0064 * dt;
 	R_mag = 0.01;
+	parameter.status.ekf_state = 1;
 }
 void predictstate(parameters *ptr)
 {
@@ -56,7 +57,7 @@ void predictstate(parameters *ptr)
 	zfromX[5] =	ptr->z_dot;
 }
 void predict(parameters *ptr)
-{ 		f32 dt = 0.01;
+{ 		f32 dt = 0.1;
 
 	  f32 cosTheta = cos(ptr->theta);
 	  f32 sinTheta = sin(ptr->theta);
@@ -96,13 +97,14 @@ void predict(parameters *ptr)
 void updatefromGps(parameters *ptr)
 {
 	predictstate(ptr);
-	predict(ptr);
+
 	u8 fix;
 	accel *position = &distance;
 	accel *velocity = &speed;
-	f32 hprimegpsT[7][6];
+
 	fix = Read_gps(position, velocity);
-	if (fix == 3)
+
+	if (1)
 	{
 		z[0][0] = position-> x;
 		z[1][0] = position-> y;

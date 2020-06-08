@@ -96,6 +96,10 @@ void HardFault_Handler(void)
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
 		sprintf(buffer, "HARDFAULT ERROR: Thread name = %s \n",osThreadGetName(osThreadGetId()));
 		fview(PRINT_NORMAL,0, buffer);
+		PWM(30, MOTOR1);
+		PWM(30, MOTOR2);
+		PWM(30, MOTOR3);
+		PWM(30, MOTOR4);
 		HAL_NVIC_SystemReset();
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
@@ -215,17 +219,15 @@ void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 	/*Turn off all motors*/
-	PWM(0, 1);
-	PWM(0, 2);
-	PWM(0, 3);
-	PWM(0, 4);
+	PWM(20, 1);
+	PWM(20, 2);
+	PWM(20, 3);
+	PWM(20, 4);
+	HAL_NVIC_SystemReset();
 	/*For testing: turn off on board LED*/
-//	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_15);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
-
   /* USER CODE END EXTI15_10_IRQn 1 */
 }
 

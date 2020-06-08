@@ -106,6 +106,13 @@ const osThreadAttr_t LATERAL_CONTROL_attributes = {
   .priority = (osPriority_t) osPriorityAboveNormal,
   .stack_size = 128 * 4
 };
+/* Definitions for GPS */
+osThreadId_t GPSHandle;
+const osThreadAttr_t GPS_attributes = {
+  .name = "GPS",
+  .priority = (osPriority_t) osPriorityNormal7,
+  .stack_size = 300 * 4
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -126,6 +133,7 @@ void RollPitch(void *argument);
 void YawCONTROLLER(void *argument);
 void Altitude(void *argument);
 void lateral(void *argument);
+void GPSmodule(void *argument);
 
 /* USER CODE BEGIN PFP */
 /* USER CODE END PFP */
@@ -224,6 +232,9 @@ int main(void)
 
   /* creation of LATERAL_CONTROL */
   LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+
+  /* creation of GPS */
+  GPSHandle = osThreadNew(GPSmodule, (void*) p, &GPS_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -780,6 +791,24 @@ void lateral(void *argument)
 	  osDelay(20);
   }
   /* USER CODE END lateral */
+}
+
+/* USER CODE BEGIN Header_GPSmodule */
+/**
+* @brief Function implementing the GPS thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_GPSmodule */
+void GPSmodule(void *argument)
+{
+  /* USER CODE BEGIN GPSmodule */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END GPSmodule */
 }
 
  /**
