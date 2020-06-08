@@ -30,23 +30,20 @@ void vdDroneStartBlock(parameters* ptr)
 	u8 next;
 	menu:
 	next = 0;
-	fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+	vdFrames("STARS");
 	fview(PRINT_NORMAL, 0, "----------------------------------------DRONE TESTING PLATFORM----------------------------------------------\n \n");
-	fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+	vdFrames("STARS");
 	fview(PRINT_NORMAL, 0, "TO INSERT PARAMETER VALUES INTO THE DRONE: FOLLOW THE GUIDE BELOW\n \n");
 	do
 	{
-		fview(PRINT_NORMAL, 0, "FOR TARGET X Y Z: INSERT 0\n");
-		fview(PRINT_NORMAL, 0, "FOR TARGET X Y Z VELOCITIES: INSERT 1\n");
-		fview(PRINT_NORMAL, 0, "FOR TARGET PSI: INSERT 2\n");
-		fview(PRINT_NORMAL, 0, "TO RETURN TO PREVIOUS MENU INSERT 3\r\n ");
+		fview(PRINT_NORMAL, 0, "FOR TARGET X Y Z: INSERT 1 \nFOR TARGET X Y Z VELOCITIES: INSERT 2 \nFOR TARGET PSI: INSERT 3 \nTO RETURN TO PREVIOUS MENU INSERT 0\r\n");
 		string_receive((u8*)buffer);
 	}while(atoi(buffer) < 0 || atoi(buffer) > 3);
 	volatile int temp = atoi(buffer);
 
 	switch(temp)
 	{
-	case 0:
+	case 1:
 	{
 		switchzayat:
 		switch (u8TestUserInterface(coordinates[next], ptr))
@@ -69,7 +66,7 @@ void vdDroneStartBlock(parameters* ptr)
 		next = 0;
 		break;
 	}
-	case 1:
+	case 2:
 	{
 		switchzayat1:
 		switch (u8TestUserInterface(velocities[next], ptr))
@@ -91,7 +88,7 @@ void vdDroneStartBlock(parameters* ptr)
 		}
 		break;
 	}
-	case 2:
+	case 3:
 	{
 		switch (u8TestUserInterface("PSI", ptr))
 		{
@@ -108,7 +105,7 @@ void vdDroneStartBlock(parameters* ptr)
 		}
 		break;
 	}
-	case 3:
+	case 0:
 	{
 		ptr->ret_flag = 1;
 		break;
@@ -117,42 +114,13 @@ void vdDroneStartBlock(parameters* ptr)
 }
 void vdMPUBlock(parameters* ptr)
 {
-	static uint8_t adad=0;
 	/*Read Gyro and Accel values, then comp filter*/
 	Read_Accel_Values(ptr);
 	Read_Gyro_Values(ptr,INTEGRAL_DT);
 	imu_Comp_Filter(ptr,INTEGRAL_DT);
 	Read_Compass_Values(ptr);
 
-	/*Template of function fview()-> fview(PRINT_TYPE, VARIABLE, STATEMENT)*/
-//	if (adad ==20)
-//	{
-//		fview(PRINT_FLOAT_WITH_TAB, ptr->phi, "Value of x = ");
-//		fview(PRINT_FLOAT_WITH_TAB, ptr->theta, "Value of y = ");
-//		fview(PRINT_FLOAT_NO_TAB, ptr->psi, "Value of z = ");
-//		adad=0;
-//	}
-//	adad++;
 
-}
-
-void vdPrintBlock(parameters* ptr)
-{
-
-	/*---------------------------------*/
-	/*TO READ FORCE VALS IN WORLD FRAME*/
-	/*---------------------------------*/
-
-	fview(PRINT_FLOAT_WITH_TAB, ptr->cmd_thrust[0], "Value of F1 = ");
-	fview(PRINT_FLOAT_WITH_TAB, ptr->cmd_thrust[1], "Value of F2 = ");
-	fview(PRINT_FLOAT_WITH_TAB, ptr->cmd_thrust[2], "Value of F3 = ");
-	fview(PRINT_FLOAT_NO_TAB, ptr->cmd_thrust[3], "Value of F4 = ");
-}
-
-void vdInsertBlock(parameters* ptr)
-{
-	uint8_t buffer[25];
-	uint8_t ok[] = {"OK"};
 }
 
 void vdOutputBlock(parameters* ptr)
@@ -289,19 +257,12 @@ void vInitPARAMETERS(parameters *ptr)
 
 void vdUserInterface(void)
 {
-	fview(PRINT_NORMAL, 0, "+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*++*+*+*+*+*+*+*+**+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*\n \n");
+	vdFrames("SPRINKLES");
 	fview(PRINT_NORMAL, 0, "+*----------------------------------RAVEN5 DRONE USER INTERFACE-------------------------------------------+*\n \n");
-	fview(PRINT_NORMAL, 0, "+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*\n \n");
-	fview(PRINT_NORMAL, 0, "SELECT MODE OF OPERATION BY INSERTING MODE NUMBER:\n");
-	fview(PRINT_NORMAL, 0, "MODE 0: CALIBRATION OF MOTORS \n");
-	fview(PRINT_NORMAL, 0, "MODE 1: NORMAL START OF MOTORS \n");
-	fview(PRINT_NORMAL, 0, "MODE 2: FREE CONTROL OF MOTORS \n");
-	fview(PRINT_NORMAL, 0, "MODE 3: HOVER POWER OF MOTORS \n");
-	fview(PRINT_NORMAL, 0, "MODE 4: FULL TEST OF SYSTEM WITH MOTORS \n");
-	fview(PRINT_NORMAL, 0, "MODE 5: FULL TEST OF SYSTEM WITHOUT MOTORS \n");
-	fview(PRINT_NORMAL, 0, "MODE 6: GET STATUS \n");
-	fview(PRINT_NORMAL, 0, "MODE 7: PROGRAM START \n");
-	fview(PRINT_NORMAL, 0, "MODE 8: SYSTEM RESET \n");
+	vdFrames("SPRINKLES");
+	fview(PRINT_NORMAL, 0, "SELECT MODE OF OPERATION BY INSERTING MODE NUMBER:\nMODE 0: CALIBRATION OF MOTORS \nMODE 1: NORMAL START OF MOTORS \nMODE 2: FREE CONTROL OF MOTORS\n");
+	fview(PRINT_NORMAL, 0, "MODE 3: HOVER POWER OF MOTORS \nMODE 4: FULL TEST OF SYSTEM WITH MOTORS \nMODE 5: FULL TEST OF SYSTEM WITHOUT MOTORS \n");
+	fview(PRINT_NORMAL, 0, "MODE 6: GET STATUS \nMODE 7: PROGRAM START \nMODE 8: SYSTEM RESET \n");
 }
 u8 u8TestUserInterface(const char* line,parameters* ptr )		/*returns value of what the user wants to do: Insert, Return or Exit*/
 {
@@ -350,5 +311,17 @@ u8 u8TestUserInterface(const char* line,parameters* ptr )		/*returns value of wh
 		if(strcmp(buffer, "1") ==0)ptr->x_cmd = atoi(buffer);
 		return 2;
 	}
+	return -1;
 
+}
+void vdFrames(const char* type)
+{
+	if(strcmp(type, "STARS")==0)
+	{
+		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+	}
+	else if(strcmp(type, "SPRINKLES")==0)
+	{
+		fview(PRINT_NORMAL, 0, "+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*++*+*+*+*+*+*+*+**+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*\n \n");
+	}
 }

@@ -18,7 +18,7 @@
 
 
 void ARM_Motors(void);
-void PWM(f32 dutyCycle, u8 motorNumber);
+void PWM(u32 dutyCycle, u8 motorNumber);
 void DISARM_Motors(void);
 void vCalibrate_Motors(void);
 void vdFreeRunPWM(void);

@@ -103,8 +103,8 @@ const osThreadAttr_t ALTITUDE_CONTRO_attributes = {
 osThreadId_t LATERAL_CONTROLHandle;
 const osThreadAttr_t LATERAL_CONTROL_attributes = {
   .name = "LATERAL_CONTROL",
-  .priority = (osPriority_t) osPriorityLow,
-  .stack_size = 129 * 4
+  .priority = (osPriority_t) osPriorityAboveNormal,
+  .stack_size = 128 * 4
 };
 /* USER CODE BEGIN PV */
 
@@ -563,6 +563,7 @@ void DroneStart(void *argument)
 {
   /* USER CODE BEGIN DroneStart */
 	char buffer[10];
+	parameter.ret_flag = 0;
   /* Infinite loop */
 	for(;;)
 	{
@@ -582,6 +583,7 @@ void DroneStart(void *argument)
 		ARM_Motors();
 		break;
 	case MODE_2:
+		parameter.status.pwm = PWM_ON;
 		vdFreeRunPWM();
 		break;
 	case MODE_3:
@@ -602,13 +604,14 @@ void DroneStart(void *argument)
 	case MODE_5:
 		/*GIVE PRIORITY TO FIRST BLOCK AND LOWER PRIORITY OF THIS FUNTION, NO PWM GENERATED*/
 		parameter.status.pwm = PWM_OFF;
+		DISARM_Motors();
 		vdDroneStartBlock(argument);
 		break;
 	case MODE_6:
 		/*PRINT ALL PWM, COORDINATES, ORIENTATION, NEXT TASK AND COMMANDED TASK*/
-		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+		vdFrames("STARS");
 		fview(PRINT_NORMAL, 0, "-------------------------------------------DRONE STATUS REPORT----------------------------------------------\n \n");
-		fview(PRINT_NORMAL, 0, "*********************************************************************************************************** \n \n");
+		vdFrames("STARS");
 		fview(PRINT_FLOAT_NO_TAB, parameter.motor1, "SPEED OF MOTOR 1 (TOP LEFT CORNER) 		= ");
 		fview(PRINT_FLOAT_NO_TAB, parameter.motor2, "SPEED OF MOTOR 2 (TOP RIGHT CORNER) 	= ");
 		fview(PRINT_FLOAT_NO_TAB, parameter.motor3, "SPEED OF MOTOR 3 (BOTTOM LEFT CORNER) 	= ");
@@ -616,6 +619,7 @@ void DroneStart(void *argument)
 		fview(PRINT_FLOAT_WITH_TAB, parameter.x, "CURRENT POSITION OF DRONE:	 X = ");
 		fview(PRINT_FLOAT_WITH_TAB, parameter.y, "Y = ");
 		fview(PRINT_FLOAT_NO_TAB, parameter.z, "Z = ");
+		fview(PRINT_INT_NO_TAB, parameter.status.pwm, 				"PWM? 				= ");
 		fview(PRINT_INT_NO_TAB, parameter.status.armed, 			"ARMED? 			= ");
 		fview(PRINT_INT_NO_TAB, parameter.status.calibrated, 		"CALIBRATED? 		= ");
 		fview(PRINT_INT_NO_TAB, parameter.status.compass_state, 	"COMPASS ACTIVE? 		= ");
@@ -628,11 +632,12 @@ void DroneStart(void *argument)
 			}while(atoi(buffer)!=0);
 		parameter.ret_flag = 1;
 		break;
-	case MODE_7:
+	case MODE_7:	/*program start*/
 		/*Raspberry configs should be here*/
-		parameter.ret_flag = 1;
+		/*Set task priority lower so other tasks can take over*/
+		parameter.status.pwm = PWM_ON;
 		break;
-	case MODE_8:
+	case MODE_8:	/*system reset*/
 		HAL_NVIC_SystemReset();
 		break;
 	default:
@@ -644,6 +649,9 @@ void DroneStart(void *argument)
 	}
 	else
 	{	/*should set task to lower priority*/
+		fview(PRINT_NORMAL, 0, "PRIORITY SET TO NORMAL 5 \n");
+		osThreadSetPriority(DRONE_STARTHandle, osPriorityNormal5);
+		fview(PRINT_NORMAL, 0, "DONE \n");
 		osDelay(2000);
 	}
   }
@@ -804,8 +812,16 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
 	s8 buffer[50];
-	sprintf(buffer, "ERROR HANDLER: Thread name = %s \n",osThreadGetName(osThreadGetId()));
+	sprintf((char*)buffer, "ERROR HANDLER: Thread name = %s \n",osThreadGetName(osThreadGetId()));
 	fview(PRINT_NORMAL,0, buffer);
+	if((parameter.motor1 >= HOVER || parameter.motor2 >= HOVER || parameter.motor3 >= HOVER || parameter.motor4 >= HOVER) && parameter.status.pwm == PWM_ON)
+	{
+		PWM(30, MOTOR1);
+		PWM(30, MOTOR2);
+		PWM(30, MOTOR3);
+		PWM(30, MOTOR4);
+	}
+	HAL_Delay(1000);
 	HAL_NVIC_SystemReset();
   /* USER CODE END Error_Handler_Debug */
 }
