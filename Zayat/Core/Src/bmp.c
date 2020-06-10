@@ -15,11 +15,15 @@ int32_t b5;
 float temp, pressure;
 void BMP_Init(void)
 {
+	volatile HAL_StatusTypeDef ret;
+//	while(1)
+	{
 	HAL_Delay(150);
 	buf[0]=0xAA;
-	HAL_I2C_Master_Transmit(&hi2c1, 0xEE, buf, 1, HAL_MAX_DELAY);
 
-	HAL_I2C_Master_Receive(&hi2c1, 0xEE, buf, 22, HAL_MAX_DELAY);
+	ret = HAL_I2C_IsDeviceReady(&hi2c1, 0xEE, 1000, 1000);
+	ret = HAL_I2C_Master_Transmit(&hi2c1, (0x77 << 1), buf, 1, HAL_MAX_DELAY);
+	ret = HAL_I2C_Master_Receive(&hi2c1, (0x77 << 1), buf, 22, HAL_MAX_DELAY);
 	ac1 = ((uint16_t)buf[0]<<8) | (buf[1]);
 	ac2 = ((uint16_t)buf[2]<<8) | (buf[3]);
 	ac3 = ((uint16_t)buf[4]<<8) | (buf[5]);
@@ -31,9 +35,8 @@ void BMP_Init(void)
 	mb  = ((uint16_t)buf[16]<<8) | (buf[17]);
 	mc  = ((uint16_t)buf[18]<<8) | (buf[19]);
 	md  = ((uint16_t)buf[20]<<8) | (buf[21]);
-
+	}
 }
-
 void UT(void)
 {
 	buf[0] = 0xF4;
@@ -60,7 +63,7 @@ void UP(void)
 	Up	>>= 7;
 }
 
-float highet(void)
+float height(void)
 {
 	int16_t x1 = ((Ut -ac6) * (int32_t)ac5) >> 15;
     int32_t x2 = ((int32_t)mc << 11) / (x1 +md);

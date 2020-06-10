@@ -14,31 +14,7 @@
  *  Created on: Feb 10, 2020
  *      Author: Zayat
  */
-/* In this file:
- *
- * 		Making a function that generates a Pulse wave with duty cycle of choice.
- *
- * 		-The timer Register is 16 bits, only 10 bits are used.
- * 		-The clock frequency is 16 MHz, with a prescale of 1024
- *
- * 	The Goal is:
- *
- * 		-To produce a 50-60 Hz square wave with duty cycle of choice to control ESC.
- *
- * 	The laws governing the resulting frequency is:
- *
- * 		F = 16000000/(prescale * (1 + TOP))	; (where TOP is 2^10 - 1) in this case (10 bits) and prescale is 1024, but
- * 												we will not use max number.
- * 		16000000/(1024*(1+TOP) = 55 Hz for example, solve for TOP = 283
- * 		since we need only 283 counts and the timer full count is 1024, therefore we should set default starting by
- * 		1024 - 1 - 283 = 740.
- * 		Now, the timer will count from 740 to 283 then overflow, which gives us 283 counts, and thus produces
- * 		 55 Hz.
- *
- * 		To set duty cycle:
- *
- * 			-Place compare value in
- */
+
 #include "PWM.h"
 #define ONE_MS 1200
 #define TWO_MS 2400
@@ -64,10 +40,10 @@ void ARM_Motors(void)
 		{
 	case 1:
 		parameter.status.pwm = PWM_ON;
-		PWM(MIN,1);
-		PWM(MIN,2);
-		PWM(MIN,3);
-		PWM(MIN,4);
+		PWM(MIN,MOTOR1);
+		PWM(MIN,MOTOR2);
+		PWM(MIN,MOTOR3);
+		PWM(MIN,MOTOR4);
 		do
 		{
 			fview(PRINT_NORMAL, 0, "PWM = 0, INSERT 0# AFTER TONE (BEEP-BEEP-BEEP) OR REPLUG/RESET IN CASE OF NO TONE\n");
@@ -76,7 +52,7 @@ void ARM_Motors(void)
 		parameter.status.armed = 1;
 		fview(PRINT_NORMAL, 0, "----------------------------------------RECEIVED AND DONE ARMING------------------------------------------- \n");
 		vdFrames("STARS");
-		HAL_Delay(3000);
+		HAL_Delay(1000);
 		parameter.ret_flag = 1;
 	case 2:
 		parameter.ret_flag = 1;
@@ -86,15 +62,15 @@ void ARM_Motors(void)
 	/*
 	 *
 	 * 		-Motor 1 = CHANNEL_1						1    2
-	 * 		-Motor 2 = CHANNEL_1						 \  /
-	 * 		-Motor 3 = CHANNEL_1						  []
-	 * 		-Motor 4 = CHANNEL_1						 /  \
+	 * 		-Motor 2 = CHANNEL_2						 \  /
+	 * 		-Motor 3 = CHANNEL_3						  []
+	 * 		-Motor 4 = CHANNEL_4						 /  \
 	 * 													3    4
 	 *
 	 */
 void PWM(u32 dutyCycle, u8 motorNumber)
 {
-	u32 temp = dutyCycle * ONE_MS / 100 + ONE_MS;
+	u32 temp = dutyCycle  + ONE_MS;
 	if(motorNumber == 1)parameter.motor1 = temp;
 	if(motorNumber == 2)parameter.motor2 = temp;
 	if(motorNumber == 3)parameter.motor3 = temp;
@@ -194,7 +170,7 @@ void vCalibrate_Motors(void)
 			fview(PRINT_NORMAL, 0, "-------------------------------------RECEIVED AND DONE CALIBRATION----------------------------------------- \n \n");
 			parameter.status.calibrated = 1;
 			parameter.ret_flag = 1;
-			HAL_Delay(3000);
+			HAL_Delay(1000);
 		}
 		else if(atoi(buffer) == 2)
 		{
@@ -214,7 +190,7 @@ void vdFreeRunPWM(void)
 	if(parameter.status.armed != 1 && parameter.status.calibrated != 1)
 	{
 		parameter.ret_flag = 1;
-		fview(PRINT_NORMAL, 0, "USER NEEDS TO CALIBRATE/ARM THE MOTORS FIRST \n");
+		fview(PRINT_NORMAL, 0, "USER NEEDS TO ARM THE MOTORS FIRST \n");
 	}
 	while(parameter.ret_flag == 0)
 	{
@@ -238,12 +214,11 @@ void vdFreeRunPWM(void)
 		}
 		else
 		{
-			int speed = atoi(buffer);
+			int speed = atoi(buffer) * MAX;
 			fview(PRINT_INT_NO_TAB, speed, "\t");
 			fview(PRINT_NORMAL, 0, "CONTINUE? \n1:YES \t2: NO \t 0: RETURN TO MAIN MENU \n");
 			string_receive(buffer);
-			s8 temp = atoi(buffer);
-			while((temp < 0 || temp > 2))
+			while((atoi(buffer) < 0 || atoi(buffer) > 2))
 			{
 				fview(PRINT_NORMAL, 0, "\nINSERT CORRECT NUMBER:\r ");
 				string_receive(buffer);
@@ -261,7 +236,7 @@ void vdFreeRunPWM(void)
 				PWM(speed, MOTOR3);
 				PWM(speed, MOTOR4);
 				fview(PRINT_NORMAL, 0, "----------------------------------------------RECEIVED----------------------------------------------------- \n");
-				HAL_Delay(3000);
+				HAL_Delay(1000);
 				break;
 			default:
 				goto insert;

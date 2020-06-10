@@ -6,7 +6,7 @@
  */
 #include "main.h"
 extern parameters parameter;
-f32 ekfcov[7][7], hprimegps[6][7], hprimegpsT[7][6], hprimeMag[7] = {0},  R_GPS[6][6],Q_load[7][7], R_mag, dt = 0.001,inverse[6][6], toinvert[6][6], K[7][6], gprime[7][7] = {0};
+f32 ekfcov[7][7], hprimegps[6][7], hprimegpsT[7][6], hprimeMag[7] = {0},  R_GPS[6][6],Q_load[7][7], R_mag, dt = 0.001, toinvert[12][12], K[7][6], gprime[7][7] = {0};
 f32 z[6][1], zfromX[6];
 accel distance;
 accel speed;
@@ -97,13 +97,10 @@ void predict(parameters *ptr)
 void updatefromGps(parameters *ptr)
 {
 	predictstate(ptr);
-
 	u8 fix;
 	accel *position = &distance;
 	accel *velocity = &speed;
-
 	fix = Read_gps(position, velocity);
-
 	if (1)
 	{
 		z[0][0] = position-> x;
@@ -123,20 +120,22 @@ void updatefromGps(parameters *ptr)
 		f32 temp4[7][1], temp5[7][7], temp6[7][7];
 		matrix_multi(6,7,7, hprimegps,ekfcov,temp1);
 		matrix_multi(6,6,7, temp1,hprimegpsT,temp2);
+
 		for (int i=0;i<6;i++)
 			for (int j=0;j<6;j++)
 				toinvert[i][j] = temp2[i][j] + R_GPS[i][j];
-		cofactor(toinvert, 6);
+		InverseOfMatrix();
 		matrix_multi(7,6,7, ekfcov,hprimegpsT,temp3);
 		for (int i=0;i<7;i++){
 			for (int j=0; j<6;j++){
 				for (int k=0; k<6;k++){
-					sum = sum + temp3[i][k] * inverse[k][j];
+					sum = sum + temp3[i][k] * toinvert[k][j+6];
 				}
 				K[i][j] = sum;
 				sum = 0;
 			}
 		}
+
 		for(int k=0; k<6; k++)
 			z[k][0] = z[k][0] - zfromX[k];
 		matrix_multi(7,1,6, K,z,temp4);
@@ -146,7 +145,7 @@ void updatefromGps(parameters *ptr)
 		ptr->x_dot += temp4[3][0];
 		ptr->y_dot += temp4[4][0];
 		ptr->z_dot += temp4[5][0];
-	matrix_multi(7,7,6, K,hprimegps, temp5);
+		matrix_multi(7,7,6, K,hprimegps, temp5);
 		for(int i = 0; i<7; i++){
 			for(int j = 0; j<7;j++)
 			{
@@ -161,7 +160,6 @@ void updatefromGps(parameters *ptr)
 			for (int j=0; j<7;j++)
 				ekfcov[i][j] = temp6[i][j];
 	}
-
 }
 void updatefromMag(parameters *ptr)
 {

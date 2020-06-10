@@ -11,10 +11,10 @@
 
 #include "main.h"
 #define MIN 0
-#define MAX 100
-#define ARMED 595
-#define F_max 54
-#define F_min -54
+#define MAX 1200
+#define F_max 792
+#define HOVER 480
+#define F_min 168
 
 
 void ARM_Motors(void);

@@ -43,7 +43,6 @@ extern I2C_HandleTypeDef hi2c1;
 
 void MPU_Init(parameters *p, const f32 RT)
 {
-	RT=0.01;
 	HAL_Delay(150);
 	buf[0]=SMPRLT_DIV;
 	buf[1]=0x00;
@@ -143,7 +142,6 @@ void MPU_Init(parameters *p, const f32 RT)
 }
 void Accel_calibration(parameters *p, f32 RT)
 {
-	RT=0.01;
 		f32 q[4], euler[3];
 		Read_Gyro_Values(p, RT);
 		Read_Accel_Values(p);
@@ -198,7 +196,6 @@ void Read_Accel_Values(parameters *p)
 void Read_Gyro_Values(parameters *p, const f32 RT)
 {
 
-		RT=0.01;
 		buf[0]=GYRO_XOUT_H;
 		HAL_I2C_Master_Transmit(&hi2c1, 0xD0, buf, 1, HAL_MAX_DELAY);
 
@@ -246,7 +243,6 @@ void Read_Gyro_Values(parameters *p, const f32 RT)
 
 void imu_Comp_Filter(parameters *p, const f32 RT)
 {
-	RT=0.01;
 
 	f32 q[4], euler[3], ang_vel[3];
 

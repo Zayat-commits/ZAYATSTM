@@ -37,6 +37,7 @@ extern "C" {
 #include <string.h>
 #include "STD_TYPES.h"
 #include "Constants.h"
+#include "compass.h"
 #include "imu6050.h"
 #include "quickmath.h"
 #include "PWM.h"
@@ -77,7 +78,6 @@ extern "C" {
 #define MOTOR3	3
 #define MOTOR4	4
 
-#define HOVER 40
 #define PWM_ON 1
 #define PWM_OFF 0
 /* USER CODE END EM */

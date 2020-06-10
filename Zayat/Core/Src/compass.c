@@ -27,21 +27,18 @@ void Compass_Init()
 	buf[1]=0b01111000;
 	buf[2]=0b10100000;
 	buf[3]=0b00000000;
-	HAL_StatusTypeDef ret;
-//		ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
-//		ret = HAL_I2C_GetState(&hi2c1);
-		ret=HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 4, HAL_MAX_DELAY);
-
-	while(ret !=HAL_OK)
+	volatile HAL_StatusTypeDef ret;
+	do
 	{
-		HAL_I2C_DeInit(&hi2c1);
-		//HAL_Delay(10);
-		HAL_I2C_Init(&hi2c1);
-		//HAL_Delay(10);
-		ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
-	}
+		HAL_Delay(150);
 
-	ret=HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 4, HAL_MAX_DELAY);
+		ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1000, 1000);
+		ret = HAL_I2C_DeInit(&hi2c1);
+		ret = HAL_I2C_Init(&hi2c1);
+		ret=HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 4, 1000);
+
+	}while(ret != HAL_OK);
+
 
 
 
@@ -145,12 +142,11 @@ HAL_StatusTypeDef ret;
 			body->psic= atan2(mag.y,mag.x) * RAD_TO_DEG;
 
 
-				 body->psic += Declination;
-					if (body->psic>180)									/* Due to declination check for >360 degree */
-						body->psic = body->psic - 360;
-						if (body->psic<-180)										/* Check for sign */
-							body->psic = body->psic + 360;
-
+			 body->psic += Declination;
+				if (body->psic>180)									/* Due to declination check for >360 degree */
+					body->psic = body->psic - 360;
+				if (body->psic<-180)										/* Check for sign */
+					body->psic = body->psic + 360;
 
 
 /*						f32  Roll  = - body->phib*DEG_TO_RAD;

@@ -115,10 +115,19 @@ void vdDroneStartBlock(parameters* ptr)
 void vdMPUBlock(parameters* ptr)
 {
 	/*Read Gyro and Accel values, then comp filter*/
-	Read_Accel_Values(ptr);
-	Read_Gyro_Values(ptr,INTEGRAL_DT);
-	imu_Comp_Filter(ptr,INTEGRAL_DT);
+//	Read_Accel_Values(ptr);
+//	Read_Gyro_Values(ptr,INTEGRAL_DT);
+//	imu_Comp_Filter(ptr,INTEGRAL_DT);
 	Read_Compass_Values(ptr);
+//	fview(PRINT_FLOAT_WITH_TAB, ptr->theta, "THETA = ");
+//	fview(PRINT_FLOAT_WITH_TAB, ptr->phi, "PHI = ");
+//	fview(PRINT_FLOAT_NO_TAB, ptr->psi, "PSI = ");
+//	fview(PRINT_FLOAT_WITH_TAB, ptr->x, "X = ");
+//	fview(PRINT_FLOAT_WITH_TAB, ptr->y, "Y = ");
+//	fview(PRINT_FLOAT_WITH_TAB, ptr->z, "Z = ");
+//	fview(PRINT_FLOAT_WITH_TAB, ptr->x_dot, "VX = ");
+//	fview(PRINT_FLOAT_WITH_TAB, ptr->y_dot, "VY = ");
+//	fview(PRINT_FLOAT_NO_TAB, ptr->z_dot, "VZ = ");
 
 
 }
@@ -130,10 +139,10 @@ void vdOutputBlock(parameters* ptr)
 	f32 t2 = ptr->u3 / l;
 	f32 t3 = - ptr->u4/ k_thrust;
 	f32 t4 = ptr->u1;
-	ptr->cmd_thrust[0] = (t1 + t2 + t3 + t4)/4.f; // front left
-	ptr->cmd_thrust[1] = (-t1 + t2 - t3 + t4)/4.f; // front right
-	ptr->cmd_thrust[2] = (t1 - t2 - t3 + t4)/4.f ; // rear left
-	ptr->cmd_thrust[3] = (-t1 - t2 + t3 + t4)/4.f; // rear right
+	ptr->cmd_thrust[0] = (t1 + t2 + t3 + t4)/4.f + HOVER; // front left
+	ptr->cmd_thrust[1] = (-t1 + t2 - t3 + t4)/4.f + HOVER; // front right
+	ptr->cmd_thrust[2] = (t1 - t2 - t3 + t4)/4.f + HOVER; // rear left
+	ptr->cmd_thrust[3] = (-t1 - t2 + t3 + t4)/4.f + HOVER; // rear right
 
 	/*-----------*/
 	/*PWM MAPPING*/
@@ -144,9 +153,6 @@ void vdOutputBlock(parameters* ptr)
 	{
 		if (ptr->cmd_thrust[i] < F_min) ptr->cmd_thrust[i]=F_min;
 		if (ptr->cmd_thrust[i] > F_max) ptr->cmd_thrust[i]=F_max;
-		speed_pwm[i] = (1/54)*(ptr->cmd_thrust[i])*25  + 40.0;
-//		fview(PRINT_NORMAL, 0, "speed of motor: ");
-//		fview(PRINT_FLOAT_NO_TAB, speed_pwm[i], " = ");
 		PWM(speed_pwm[i],i+1);
 	}
 }
@@ -198,11 +204,11 @@ void fview(uint8_t type, float argument, char * line)
 		uint32_t y = abs(x%100);
 		if(argument < 0 && x/100 >= 0 && x/100 < 1 )
 		{
-			(type == PRINT_FLOAT_NO_TAB)? sprintf((char*)buffer, "%s-%ld.%02lu \n", line, x/100,y) : sprintf((char*)buffer, "%s-%ld.%02lu \t", line, x/100,y);
+			(type == PRINT_FLOAT_NO_TAB)? sprintf((char*)buffer, "%s -%ld .%02lu \n", line, x/100,y) : sprintf((char*)buffer, "%s -%ld .%02lu \t", line, x/100,y);
 		}
 		else
 		{
-			(type == PRINT_FLOAT_NO_TAB)? sprintf((char*)buffer, "%s%ld.%02lu \n", line, x/100,y) : sprintf((char*)buffer, "%s%ld.%02lu \t", line, x/100,y);
+			(type == PRINT_FLOAT_NO_TAB)? sprintf((char*)buffer, "%s %ld .%02lu \n", line, x/100,y) : sprintf((char*)buffer, "%s %ld .%02lu \t", line, x/100,y);
 		}
 	}
 	else if(type == PRINT_INT_NO_TAB || type == PRINT_INT_WITH_TAB)

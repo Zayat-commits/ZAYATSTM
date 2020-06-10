@@ -62,7 +62,7 @@ osThreadId_t DRONE_STARTHandle;
 const osThreadAttr_t DRONE_START_attributes = {
   .name = "DRONE_START",
   .priority = (osPriority_t) osPriorityHigh,
-  .stack_size = 700 * 4
+  .stack_size = 300 * 4
 };
 /* Definitions for IMU */
 osThreadId_t IMUHandle;
@@ -83,7 +83,7 @@ osThreadId_t ROLL_PITCHHandle;
 const osThreadAttr_t ROLL_PITCH_attributes = {
   .name = "ROLL_PITCH",
   .priority = (osPriority_t) osPriorityNormal7,
-  .stack_size = 500 * 4
+  .stack_size = 300 * 4
 };
 /* Definitions for YAW */
 osThreadId_t YAWHandle;
@@ -110,8 +110,8 @@ const osThreadAttr_t LATERAL_CONTROL_attributes = {
 osThreadId_t GPSHandle;
 const osThreadAttr_t GPS_attributes = {
   .name = "GPS",
-  .priority = (osPriority_t) osPriorityNormal7,
-  .stack_size = 300 * 4
+  .priority = (osPriority_t) osPriorityAboveNormal,
+  .stack_size = 700 * 4
 };
 /* USER CODE BEGIN PV */
 
@@ -179,12 +179,12 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  vInitPARAMETERS(&parameter);
-//  HAL_Delay(150);
+//  vInitPARAMETERS(&parameter);
+  HAL_Delay(150);
+  BMP_Init();
 //  MPU_Init(p, INTEGRAL_DT);
-//  Compass_Init();
+  Compass_Init();
 //  init_EKF();
-//
 //  gps_init();
 
   /* USER CODE END 2 */
@@ -210,31 +210,31 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of BODY_RATES */
-  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
-
-  /* creation of DRONE_START */
-  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
-
-  /* creation of IMU */
+//  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
+//
+//  /* creation of DRONE_START */
+//  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
+//
+//  /* creation of IMU */
   IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
-
-  /* creation of OUTPUT_THRUST */
-  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
-
-  /* creation of ROLL_PITCH */
-  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
-
-  /* creation of YAW */
-  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
-
-  /* creation of ALTITUDE_CONTRO */
-  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
-
-  /* creation of LATERAL_CONTROL */
-  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
-
-  /* creation of GPS */
-  GPSHandle = osThreadNew(GPSmodule, (void*) p, &GPS_attributes);
+//
+//  /* creation of OUTPUT_THRUST */
+//  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
+//
+//  /* creation of ROLL_PITCH */
+//  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
+//
+//  /* creation of YAW */
+//  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
+//
+//  /* creation of ALTITUDE_CONTRO */
+//  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
+//
+//  /* creation of LATERAL_CONTROL */
+//  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+//
+//  /* creation of GPS */
+//  GPSHandle = osThreadNew(GPSmodule, (void*) p, &GPS_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -307,8 +307,8 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 200000;
-  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_16_9;
+  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -373,12 +373,11 @@ static void MX_TIM2_Init(void)
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
   sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
@@ -680,7 +679,7 @@ void MPU(void *argument)
 {
   /* USER CODE BEGIN MPU */
   /* Infinite loop */
-	s32 tickzayat;
+	volatile s32 tickzayat;
 	for(;;)
 	{
 		tickzayat = osKernelGetTickCount();
@@ -689,8 +688,8 @@ void MPU(void *argument)
 
 		/*Calculate total ticks needed for 10 ms period*/
 		tickzayat = osKernelGetTickCount() - tickzayat;
-		tickzayat = 100 - tickzayat;
-		if(tickzayat < 0)tickzayat = 100;
+		tickzayat = 60 - tickzayat;
+//		if(tickzayat < 0)tickzayat = 10;
 		tickzayat = osKernelGetTickCount() + tickzayat;
 		/*---------------------------------------------*/
 		osDelayUntil(tickzayat);
@@ -803,10 +802,19 @@ void lateral(void *argument)
 void GPSmodule(void *argument)
 {
   /* USER CODE BEGIN GPSmodule */
+	static volatile s32 tickzayat1;
   /* Infinite loop */
+
   for(;;)
   {
-    osDelay(1);
+	  tickzayat1 = 0;
+	  tickzayat1 = osKernelGetTickCount();
+	  updatefromGps(argument);
+	  tickzayat1 = osKernelGetTickCount() - tickzayat1;
+	  tickzayat1 = 100 - tickzayat1;
+	  tickzayat1 = tickzayat1 + osKernelGetTickCount();
+    osDelayUntil(tickzayat1);
+//	  osDelay(60);
   }
   /* USER CODE END GPSmodule */
 }

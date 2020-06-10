@@ -10,6 +10,6 @@
 void BMP_Init(void);
 void UT(void);
 void UP(void);
-float highet(void);
+float height(void);
 
 #endif /* SRC_BMP_H_ */
