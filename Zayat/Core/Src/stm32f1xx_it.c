@@ -96,10 +96,10 @@ void HardFault_Handler(void)
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
 		sprintf(buffer, "HARDFAULT ERROR: Thread name = %s \n",osThreadGetName(osThreadGetId()));
 		fview(PRINT_NORMAL,0, buffer);
-		PWM(30, MOTOR1);
-		PWM(30, MOTOR2);
-		PWM(30, MOTOR3);
-		PWM(30, MOTOR4);
+		PWM(LANDING, MOTOR1);
+		PWM(LANDING, MOTOR2);
+		PWM(LANDING, MOTOR3);
+		PWM(LANDING, MOTOR4);
 		HAL_NVIC_SystemReset();
     /* USER CODE END W1_HardFault_IRQn 0 */
   }

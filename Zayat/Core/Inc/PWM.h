@@ -14,6 +14,7 @@
 #define MAX 1200
 #define F_max 792
 #define HOVER 480
+#define LANDING 360
 #define F_min 168
 
 

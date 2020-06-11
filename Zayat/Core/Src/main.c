@@ -111,14 +111,14 @@ osThreadId_t GPSHandle;
 const osThreadAttr_t GPS_attributes = {
   .name = "GPS",
   .priority = (osPriority_t) osPriorityAboveNormal,
-  .stack_size = 400 * 4
+  .stack_size = 600 * 4
 };
 /* Definitions for Height */
 osThreadId_t HeightHandle;
 const osThreadAttr_t Height_attributes = {
   .name = "Height",
   .priority = (osPriority_t) osPriorityAboveNormal2,
-  .stack_size = 400 * 4
+  .stack_size = 200 * 4
 };
 /* USER CODE BEGIN PV */
 
@@ -221,7 +221,7 @@ int main(void)
 //  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
 //
 //  /* creation of DRONE_START */
-//  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
+  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
 //
 //  /* creation of IMU */
 //  IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
@@ -245,7 +245,7 @@ int main(void)
 //  GPSHandle = osThreadNew(GPSmodule, (void*) p, &GPS_attributes);
 
   /* creation of Height */
-  HeightHandle = osThreadNew(BMP, NULL, &Height_attributes);
+  HeightHandle = osThreadNew(BMP, (void*) p, &Height_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -887,10 +887,10 @@ void Error_Handler(void)
 	fview(PRINT_NORMAL,0, buffer);
 	if((parameter.motor1 >= HOVER || parameter.motor2 >= HOVER || parameter.motor3 >= HOVER || parameter.motor4 >= HOVER) && parameter.status.pwm == PWM_ON)
 	{
-		PWM(30, MOTOR1);
-		PWM(30, MOTOR2);
-		PWM(30, MOTOR3);
-		PWM(30, MOTOR4);
+		PWM(LANDING, MOTOR1);
+		PWM(LANDING, MOTOR2);
+		PWM(LANDING, MOTOR3);
+		PWM(LANDING, MOTOR4);
 	}
 	HAL_Delay(1000);
 	HAL_NVIC_SystemReset();
