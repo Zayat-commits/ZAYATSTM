@@ -9,9 +9,10 @@
 #include "bmp.h"
 extern I2C_HandleTypeDef hi2c1;
 uint8_t buf[30];
-uint16_t ac1, ac2, ac3, ac4, ac5, ac6, b1, b2, mb, mc, md, Ut;
-uint32_t Up;
-int32_t b5;
+int16_t ac1, ac2, ac3, b1, b2, mb, mc, md;
+uint16_t  ac4, ac5, ac6;
+int32_t Up;
+int32_t b5, Ut;
 float temp, pressure;
 void BMP_Init(void)
 {
@@ -27,9 +28,9 @@ void BMP_Init(void)
 	ac1 = ((uint16_t)buf[0]<<8) | (buf[1]);
 	ac2 = ((uint16_t)buf[2]<<8) | (buf[3]);
 	ac3 = ((uint16_t)buf[4]<<8) | (buf[5]);
-	ac4 = ((uint16_t)buf[6]<<8) | (buf[7]);
-	ac5 = ((uint16_t)buf[8]<<8) | (buf[9]);
-	ac6 = ((uint16_t)buf[10]<<8)| (buf[11]);
+	ac4 = ((int16_t)buf[6]<<8) | (buf[7]);
+	ac5 = ((int16_t)buf[8]<<8) | (buf[9]);
+	ac6 = ((int16_t)buf[10]<<8)| (buf[11]);
 	b1  = ((uint16_t)buf[12]<<8) | (buf[13]);
 	b2  = ((uint16_t)buf[14]<<8) | (buf[15]);
 	mb  = ((uint16_t)buf[16]<<8) | (buf[17]);
@@ -42,22 +43,22 @@ void UT(void)
 	buf[0] = 0xF4;
 	buf[1] = 0x2E;
 	HAL_I2C_Master_Transmit(&hi2c1, 0xEE, buf, 2, HAL_MAX_DELAY);
-	//delay shit
+	osDelay(5);
 	buf[0] = 0xF6;
 	HAL_I2C_Master_Transmit(&hi2c1, 0xEE, buf, 1, HAL_MAX_DELAY);
 	HAL_I2C_Master_Receive(&hi2c1, 0xEE, buf, 2, HAL_MAX_DELAY);
-	Ut = ((uint16_t)buf[0]<<8) | (buf[1]);
+	Ut = ((int16_t)buf[0]<<8) | (buf[1]);
 }
 void UP(void)
 {
 	buf[0] = 0xF4;
 	buf[1] = 0x34 + (1<<6);
 	HAL_I2C_Master_Transmit(&hi2c1, 0xEE, buf, 2, HAL_MAX_DELAY);
-	//delay shit
+	osDelay(10);
 	buf[0] = 0xF6;
 	HAL_I2C_Master_Transmit(&hi2c1, 0xEE, buf, 1, HAL_MAX_DELAY);
 	HAL_I2C_Master_Receive(&hi2c1, 0xEE, buf, 3, HAL_MAX_DELAY);
-	Up = ((uint16_t)buf[0]<<8) | (buf[1]);
+	Up = ((int16_t)buf[0]<<8) | (buf[1]);
 	Up <<= 8;
 	Up |= buf[2];
 	Up	>>= 7;
@@ -65,7 +66,7 @@ void UP(void)
 
 float height(void)
 {
-	int16_t x1 = ((Ut -ac6) * (int32_t)ac5) >> 15;
+	int32_t x1 = ((Ut -ac6) * (int32_t)ac5) >> 15;
     int32_t x2 = ((int32_t)mc << 11) / (x1 +md);
     b5 = x1 + x2;
     //temp = (int32_t)((b5 + 8) >> 4);
