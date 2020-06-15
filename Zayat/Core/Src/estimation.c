@@ -125,8 +125,9 @@ void updatefromGps(parameters *ptr)
 		for (int i=0;i<6;i++)
 			for (int j=0;j<6;j++)
 				toinvert[i][j] = temp2[i][j] + R_GPS[i][j];
-		cofactor(toinvert, 6);
-		matrix_multi(7,6,7, ekfcov,hprimegpsT,temp3);
+		int r = cofactor(toinvert, 6);
+		if (r != 1)
+		{matrix_multi(7,6,7, ekfcov,hprimegpsT,temp3);
 		for (int i=0;i<7;i++){
 			for (int j=0; j<6;j++){
 				for (int k=0; k<6;k++){
@@ -160,6 +161,7 @@ void updatefromGps(parameters *ptr)
 		for (int i=0;i<7;i++)
 			for (int j=0; j<7;j++)
 				ekfcov[i][j] = temp6[i][j];
+	}
 	}
 }
 void updatefromMag(parameters *ptr)

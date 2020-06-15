@@ -4,9 +4,9 @@
  *  Created on: Feb 18, 2020
  *      Author: Khaled Ali
  */
-
 #include "main.h"
 extern f32 inverse[6][6];
+int c = 0;
 float power(float base, int exp) {
     if(exp < 0) {
         if(base == 0)
@@ -132,7 +132,7 @@ float determinant(float a[6][6], int k)
 
     return (det);
 }
-void cofactor(float num[6][6], int f)
+int cofactor(float num[6][6], int f)
 {
  float b[6][6], fac[6][6], x;
  int p, q, m, n, i, j;
@@ -161,11 +161,15 @@ void cofactor(float num[6][6], int f)
       }
      	 x = determinant(b, f - 1);
      	if (x == 0)
+     		{
      		x = 0.1;
+     		c = 1;
+     		}
       fac[q][p] = pow(-1, q + p) * x;
     }
   }
 transpose(num, fac, f);
+return c;
 }
 
 void transpose(float num[6][6], float fac[6][6], int r)
@@ -182,7 +186,10 @@ void transpose(float num[6][6], float fac[6][6], int r)
     }
   d = determinant(num, r);
   if (d==0)
+	  {
 	  d = 0.1;
+	  c = 1;
+	  }
   for (i = 0;i < r; i++)
     {
      for (j = 0;j < r; j++)
