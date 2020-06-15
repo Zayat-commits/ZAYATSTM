@@ -6,7 +6,7 @@
  */
 
 #include "main.h"
-extern f32 toinvert[12][12];
+extern f32 inverse[6][6];
 float power(float base, int exp) {
     if(exp < 0) {
         if(base == 0)
@@ -92,78 +92,103 @@ void Rotate_BtoW_acc(f32 *acc, f32 *q)
 	acc[2] = acc2[2];
 
 }
-void InverseOfMatrix(void)
+float determinant(float a[6][6], int k)
 {
-    // Matrix Declaration.
-	int order = 6;
-    float temp;
-    // Create the augmented matrix
-    // Add the identity matrix
-    // of order at the end of original matrix.
-    for (int i = 0; i < order; i++) {
-
-        for (int j = 0; j < 2 * order; j++) {
-
-            // Add '1' at the diagonal places of
-            // the matrix to create a identity matirx
-            if (j == (i + order))
-                toinvert[i][j] = 1;
-        }
+  float s = 1, det = 0, b[6][6];
+  int i, j, m, n, c;
+  if (k == 1)
+    {
+     return (a[0][0]);
+    }
+  else
+    {
+     det = 0;
+     for (c = 0; c < k; c++)
+       {
+        m = 0;
+        n = 0;
+        for (i = 0;i < k; i++)
+          {
+            for (j = 0 ;j < k; j++)
+              {
+                b[i][j] = 0;
+                if (i != 0 && j != c)
+                 {
+                   b[m][n] = a[i][j];
+                   if (n < (k - 2))
+                    n++;
+                   else
+                    {
+                     n = 0;
+                     m++;
+                     }
+                   }
+               }
+             }
+          det = det + s * (a[0][c] * determinant(b, k - 1));
+          s = -1 * s;
+          }
     }
 
-    // Interchange the row of matrix,
-    // interchanging of row will start from the last row
-    for (int i = order - 1; i > 0; i--) {
-
-        // Swapping each and every element of the two rows
-         if (toinvert[i - 1][0] < toinvert[i][0])
-         for (int j = 0; j < 2 * order; j++) {
-
-                // Swapping of the row, if above
-                // condition satisfied.
-         temp = toinvert[i][j];
-         toinvert[i][j] = toinvert[i - 1][j];
-         toinvert[i - 1][j] = temp;
-            }
-
-        // Directly swapping the rows using pointers saves time
-
-        /*if (toinvert[i - 1][0] < toinvert[i][0]) {
-            float* temp = toinvert[i];
-            toinvert[i] = toinvert[i - 1];
-            toinvert[i - 1] = temp;
-        }*/
-    }
-
-    // Replace a row by sum of itself and a
-    // constant multiple of another row of the matrix
-    for (int i = 0; i < order; i++) {
-
-        for (int j = 0; j < order; j++) {
-
-            if (j != i) {
-            		if (toinvert[i][i] == 0)
-            			toinvert[i][i] = 0.1;
-                temp = toinvert[j][i] / toinvert[i][i];
-                for (int k = 0; k < 2 * order; k++) {
-
-                    toinvert[j][k] -= toinvert[i][k] * temp;
-                }
-            }
-        }
-    }
-
-    // Multiply each row by a nonzero integer.
-    // Divide row element by the diagonal element
-    for (int i = 0; i < order; i++) {
-
-        temp = toinvert[i][i];
-        if(temp == 0)
-        	temp = 0.1;
-        for (int j = 0; j < 2 * order; j++) {
-
-            toinvert[i][j] = toinvert[i][j] / temp;
-        }
-    }
-    return;
+    return (det);
 }
+void cofactor(float num[6][6], int f)
+{
+ float b[6][6], fac[6][6], x;
+ int p, q, m, n, i, j;
+ for (q = 0;q < f; q++)
+ {
+   for (p = 0;p < f; p++)
+    {
+     m = 0;
+     n = 0;
+     for (i = 0;i < f; i++)
+     {
+       for (j = 0;j < f; j++)
+        {
+          if (i != q && j != p)
+          {
+            b[m][n] = num[i][j];
+            if (n < (f - 2))
+             n++;
+            else
+             {
+               n = 0;
+               m++;
+               }
+            }
+        }
+      }
+     	 x = determinant(b, f - 1);
+     	if (x == 0)
+     		x = 0.1;
+      fac[q][p] = pow(-1, q + p) * x;
+    }
+  }
+transpose(num, fac, f);
+}
+
+void transpose(float num[6][6], float fac[6][6], int r)
+{
+  int i, j;
+  float b[6][6], d;
+
+  for (i = 0;i < r; i++)
+    {
+     for (j = 0;j < r; j++)
+       {
+         b[i][j] = fac[j][i];
+        }
+    }
+  d = determinant(num, r);
+  if (d==0)
+	  d = 0.1;
+  for (i = 0;i < r; i++)
+    {
+     for (j = 0;j < r; j++)
+       {
+        inverse[i][j] = b[i][j] / d;
+        }
+    }
+}
+

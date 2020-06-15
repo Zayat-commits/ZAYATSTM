@@ -19,7 +19,7 @@
 #define ONE_MS 1200
 #define TWO_MS 2400
 
-extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim1;
 extern UART_HandleTypeDef huart1;
 extern TIM_OC_InitTypeDef sConfigOCZayat;
 extern parameters parameter;
@@ -34,7 +34,8 @@ void ARM_Motors(void)
 	do
 	{
 		fview(PRINT_NORMAL, 0, "1#: YES\t 2#: NO \n");
-		string_receive(buffer);
+//		string_receive(buffer);
+		HAL_UART_Receive(&huart1, buffer, 1, HAL_MAX_DELAY);
 	}while(atoi(buffer) != 1 && atoi(buffer) != 2);
 	switch (atoi(buffer))
 		{
@@ -47,7 +48,8 @@ void ARM_Motors(void)
 		do
 		{
 			fview(PRINT_NORMAL, 0, "PWM = 0, INSERT 0# AFTER TONE (BEEP-BEEP-BEEP) OR REPLUG/RESET IN CASE OF NO TONE\n");
-			string_receive(buffer);
+//			string_receive(buffer);
+			HAL_UART_Receive(&huart1, buffer, 1, HAL_MAX_DELAY);
 		}while(atoi(buffer) != 0);
 		parameter.status.armed = 1;
 		fview(PRINT_NORMAL, 0, "----------------------------------------RECEIVED AND DONE ARMING------------------------------------------- \n");
@@ -81,32 +83,32 @@ void PWM(u32 dutyCycle, u8 motorNumber)
 		switch(motorNumber)
 		{
 		case 1:
-			   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_1) != HAL_OK)
+			   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOCZayat, TIM_CHANNEL_1) != HAL_OK)
 			   {
 				 Error_Handler();
 			   }
-			   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+			   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 			   break;
 		case 2:
-			   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_2) != HAL_OK)
+			   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOCZayat, TIM_CHANNEL_2) != HAL_OK)
 			   {
 				 Error_Handler();
 			   }
-			   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+			   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
 			   break;
 		case 3:
-			   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_3) != HAL_OK)
+			   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOCZayat, TIM_CHANNEL_3) != HAL_OK)
 			   {
 				 Error_Handler();
 			   }
-			   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+			   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
 			   break;
 		case 4:
-			   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCZayat, TIM_CHANNEL_4) != HAL_OK)
+			   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOCZayat, TIM_CHANNEL_4) != HAL_OK)
 			   {
 				 Error_Handler();
 			   }
-			   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
+			   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
 			   break;
 		default:
 			PWM(0, MOTOR1);
@@ -120,10 +122,10 @@ void PWM(u32 dutyCycle, u8 motorNumber)
 /* Disabling all timers*/
 void DISARM_Motors(void)
 {
-	   HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
-	   HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_2);
-	   HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_3);
-	   HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_4);
+	   HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+	   HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
+	   HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
+	   HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_4);
 	   parameter.status.pwm = PWM_OFF;
 //	   parameter.status.calibrated = 0;
 //	   parameter.status.armed = 0;
@@ -139,7 +141,8 @@ void vCalibrate_Motors(void)
 			fview(PRINT_NORMAL, 0, "---------------------------------ARE YOU SURE YOU WANT TO CALIBRATE?---------------------------------------\n");
 			vdFrames("STARS");
 			fview(PRINT_NORMAL, 0, "CALIBRATION IS DONE BY APPLYING 100 % POWER TO MOTORS FOLLOWED BY 0 % SEPARATED BY SPECIFIC TONE (BEEP-BEEP)\n1: YES\t 2: NO \n");
-			string_receive(buffer);
+//			string_receive(buffer);
+			HAL_UART_Receive(&huart1, buffer, 1, HAL_MAX_DELAY);
 		}while(atoi(buffer) != 1 && atoi(buffer) != 2);
 
 
@@ -153,7 +156,8 @@ void vCalibrate_Motors(void)
 			do
 			{
 				fview(PRINT_NORMAL, 0, "PWM = 100, INSERT 0 AFTER FIRST TONE (BEEP-BEEP) OR REPLUG/RESET IN CASE OF NO TONE\n");
-				string_receive(buffer);
+//				string_receive(buffer);
+				HAL_UART_Receive(&huart1, buffer, 1, HAL_MAX_DELAY);
 			}while(atoi(buffer) != 0);
 
 			fview(PRINT_NORMAL, 0, "----------------------------------------------RECEIVED----------------------------------------------------- \n \n");
@@ -164,7 +168,8 @@ void vCalibrate_Motors(void)
 			do
 			{
 				fview(PRINT_NORMAL, 0, "PWM = 0, INSERT 0 AFTER SECOND TONE (BEEP-BEEP) OR REPLUG/RESET SYSTEM IN CASE OF NO TONE\n");
-				string_receive(buffer);
+//				string_receive(buffer);
+				HAL_UART_Receive(&huart1, buffer, 1, HAL_MAX_DELAY);
 			}while(atoi(buffer) != 0);
 
 			fview(PRINT_NORMAL, 0, "-------------------------------------RECEIVED AND DONE CALIBRATION----------------------------------------- \n \n");
@@ -200,11 +205,14 @@ void vdFreeRunPWM(void)
 		insert:
 
 		fview(PRINT_NORMAL, 0, "TO RETURN TO PREVIOUS MENU INSERT -1 \nOTHERWISE, THE PWM RANGES FROM 0 ~ 100. \nINSERT HERE: ");
-		string_receive(buffer);
+//		string_receive(buffer);
+		HAL_UART_Receive(&huart1, buffer, 3, HAL_MAX_DELAY);
+
 		while(atoi(buffer) > 100 || atoi(buffer) < -1)
 		{
 			fview(PRINT_NORMAL, 0, "\nINSERT CORRECT NUMBER: ");
-			string_receive(buffer);
+//			string_receive(buffer);
+			HAL_UART_Receive(&huart1, buffer, 3, HAL_MAX_DELAY);
 
 		}
 		if(atoi(buffer) == -1)
@@ -214,14 +222,17 @@ void vdFreeRunPWM(void)
 		}
 		else
 		{
-			int speed = atoi(buffer) * MAX;
+			int speed = atoi(buffer) * MAX / 100;
 			fview(PRINT_INT_NO_TAB, speed, "\t");
 			fview(PRINT_NORMAL, 0, "CONTINUE? \n1:YES \t2: NO \t 0: RETURN TO MAIN MENU \n");
-			string_receive(buffer);
+//			string_receive(buffer);
+			HAL_UART_Receive(&huart1, buffer, 2, HAL_MAX_DELAY);
+
 			while((atoi(buffer) < 0 || atoi(buffer) > 2))
 			{
 				fview(PRINT_NORMAL, 0, "\nINSERT CORRECT NUMBER:\r ");
-				string_receive(buffer);
+//				string_receive(buffer);
+				HAL_UART_Receive(&huart1, buffer, 2, HAL_MAX_DELAY);
 
 			}
 			switch (atoi(buffer))

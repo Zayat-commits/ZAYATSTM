@@ -19,11 +19,11 @@ typedef signed long int s32;
 typedef float f32;
 typedef double f64;
 
-#define INTEGRAL_DT 0.06
+#define INTEGRAL_DT 0.025
 
 /*All the parameters needed with a total size of 168 Bytes*/
 typedef struct parameters{
-	f32 x, y, z;
+	f32 x, y, z, z_baro;
 	f32 x_dot, y_dot, z_dot;
 	f32 x_dot_dot, y_dot_dot, z_dot_dot;
 	f32 phi, theta, psi;
@@ -37,6 +37,7 @@ typedef struct parameters{
 	f32 psi_cmd, p_cmd, q_cmd, r_cmd;
 	f32 u1, u2, u3, u4;
 	f32 cmd_thrust[4];
+	f32 xgps,ygps,zgps,vxgps,vygps,vzgps;
 	struct status
 	{
 		u8 calibrated;
@@ -46,6 +47,7 @@ typedef struct parameters{
 		u8 gps_state;
 		u8 ekf_state;
 		u8 pwm;
+		u8 busystate;
 	}status;
 	u8 ret_flag;
 	f32 motor1,motor2,motor3,motor4;

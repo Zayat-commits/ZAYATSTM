@@ -1134,6 +1134,9 @@ HAL_StatusTypeDef HAL_UART_Receive(UART_HandleTypeDef *huart, uint8_t *pData, ui
     huart->RxXferSize = Size;
     huart->RxXferCount = Size;
 
+    /* Process Unlocked */
+    __HAL_UNLOCK(huart);
+
     /* Check the remain data to be received */
     while (huart->RxXferCount > 0U)
     {
@@ -1178,8 +1181,6 @@ HAL_StatusTypeDef HAL_UART_Receive(UART_HandleTypeDef *huart, uint8_t *pData, ui
     /* At end of Rx process, restore huart->RxState to Ready */
     huart->RxState = HAL_UART_STATE_READY;
 
-    /* Process Unlocked */
-    __HAL_UNLOCK(huart);
 
     return HAL_OK;
   }

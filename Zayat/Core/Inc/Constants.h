@@ -11,13 +11,13 @@
 #define Ixx			0.08
 #define Iyy			0.08
 #define Izz 		0.000638
-#define mass		1.5
+#define mass		1.2
 #define kp_bank		10.0
 #define g			9.812
 #define L  			1.0
 #define k_thrust	0.016
-#define kp_xy		32.0
-#define kd_xy		12.0
+#define kp_xy		1.0
+#define kd_xy		5.0
 #define	kp_z		32.0
 #define kd_z		12.0
 #define	kp_yaw		2.0

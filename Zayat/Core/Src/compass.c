@@ -1,7 +1,7 @@
 
 #include "compass.h"
 
-f32 Xh,Yh;
+f32	Xh,Yh;
 f32 xMax, yMax, xMin, yMin,zMin, zMax;
 f32     Mag_x_offset,    Mag_y_offset ,   Mag_z_offset ;
 accel mag;
@@ -27,22 +27,26 @@ void Compass_Init()
 	buf[1]=0b01111000;
 	buf[2]=0b10100000;
 	buf[3]=0b00000000;
-	volatile HAL_StatusTypeDef ret;
-	do
-	{
-		HAL_Delay(150);
-
-		ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1000, 1000);
-		ret = HAL_I2C_DeInit(&hi2c1);
-		ret = HAL_I2C_Init(&hi2c1);
+	HAL_StatusTypeDef ret;
+//		ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
+//		ret = HAL_I2C_GetState(&hi2c1);
+	HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1000, 1000);
 		ret=HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 4, 1000);
 
-	}while(ret != HAL_OK);
+//	while(ret !=HAL_OK)
+//	{
+//		HAL_I2C_DeInit(&hi2c1);
+//		//HAL_Delay(10);
+//		HAL_I2C_Init(&hi2c1);
+//		//HAL_Delay(10);
+//		ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
+//	}
 
-
-
-
-HAL_Delay(100);
+//	ret=HAL_I2C_Master_Transmit(&hi2c1, 0x3C, buf, 4, HAL_MAX_DELAY);
+//
+//
+//
+//HAL_Delay(100);
 //
 //
 //		buf[0]=0x03;
@@ -61,7 +65,7 @@ HAL_Delay(100);
 //
 //
 //
-//	for (u16 i=0 ; i<12000 ; i++)
+//	for (u16 i=0 ; i<24000 ; i++)
 //		{
 //
 //		if (xMin<mag.x) xMin=mag.x;
@@ -88,10 +92,9 @@ HAL_Delay(100);
 //				HAL_Delay(5);
 //		}
 //int xxx;
-	xMax=  -85; xMin=-308; yMax= -191; yMin=255; zMax= -256; zMin=255;
+	xMax=  -459; xMin=580; yMax= -310; yMin=712; zMax= -597; zMin=503;
 
 //send smth like DONE CALIB
-
 
 }
 
@@ -100,7 +103,7 @@ void Read_Compass_Values(parameters *body)
 HAL_StatusTypeDef ret;
 
 
-//	ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
+	ret = HAL_I2C_IsDeviceReady(&hi2c1, 0x3C, 1, HAL_MAX_DELAY);
 //	while(ret !=HAL_OK)
 //	{
 //		HAL_I2C_Master_Abort_IT(&hi2c1, 0x3C);
@@ -130,33 +133,26 @@ HAL_StatusTypeDef ret;
 				mag.x -= ((xMax + xMin) / 2.0);
 				mag.y -= ((yMax + yMin) / 2.0);
 				mag.z -= ((zMax + zMin) / 2.0);
+
 				f32  Roll  = - body->phib*DEG_TO_RAD;
-				f32 Pitch =- body->thetab*DEG_TO_RAD;
+				f32 Pitch = -body->thetab*DEG_TO_RAD;
 
-			 Xh = mag.x * cos(Pitch) + mag.z * sin(Pitch);
-			Yh = mag.x * sin(Roll) * sin(Pitch) + mag.y * cos(Roll) + mag.z * sin(Roll) * cos(Pitch);
-
-
-
-//			body->psic= atan2(Xh,Yh) * RAD_TO_DEG;
-			body->psic= atan2(mag.y,mag.x) * RAD_TO_DEG;
-
-
-			 body->psic += Declination;
-				if (body->psic>180)									/* Due to declination check for >360 degree */
-					body->psic = body->psic - 360;
-				if (body->psic<-180)										/* Check for sign */
-					body->psic = body->psic + 360;
-
-
-/*						f32  Roll  = - body->phib*DEG_TO_RAD;
-						f32 Pitch = -body->thetab*DEG_TO_RAD;
-
-					f32 Xh = mag.x * cos(Pitch) + mag.z * sin(Pitch);
-					f32 Yh = mag.x * sin(Roll) * sin(Pitch) + mag.y * cos(Roll) + mag.z * sin(Roll) * cos(Pitch);
+			f32 Xh = mag.x * cos(Pitch) + mag.z * sin(Pitch);
+			f32 Yh = mag.x * sin(Roll) * sin(Pitch) + mag.y * cos(Roll) + mag.z * sin(Roll) * cos(Pitch);
 
 
 
-						body->psic= atan2(Xh,Yh) * RAD_TO_DEG;//there are for GPS compass */
+				body->psic= atan2(Xh,Yh) * RAD_TO_DEG;//there are for GPS compass
+//			body->psic= atan2(mag.y,mag.x) * RAD_TO_DEG;
+
+
+				 body->psic += Declination+180;
+					if (body->psic>180)									/* Due to declination check for >360 degree */
+						body->psic = body->psic - 360;
+					else if (body->psic<-180)										/* Check for sign */
+							body->psic = body->psic + 360;
+
+
+
 
 }

@@ -218,7 +218,7 @@ void Read_Gyro_Values(parameters *p, const f32 RT)
 	//Body frame phi and theta
 	p->phib = p->phib+RT*p->p ;
 	p->thetab = p->thetab+RT*p->q;
-	p->psib = p->psib+RT*p->r;
+	p->psib = p->psib-RT*p->r;
 
 	f32 first_term;
 	f32 second_term;
@@ -233,7 +233,9 @@ void Read_Gyro_Values(parameters *p, const f32 RT)
 
 
    p->phib = first_term * p->phib + second_term * accelPhi;
-    p->thetab = first_term * p->thetab + second_term * acceltheta;
+   p->thetab = first_term * p->thetab + second_term * acceltheta;
+   p->psib = first_term * p->psib + second_term * p->psic;
+
 	if(p->psib > 180.0)
 		p->psib -= 360;
 	if(p->psib < -180.0)
@@ -274,6 +276,8 @@ void imu_Comp_Filter(parameters *p, const f32 RT)
 	p->x += RT * p->x_dot;
 	p->y += RT * p->y_dot;
 	p->z += RT * p->z_dot;
+	p->z = 0.99*p->z +0.01*p->z_baro;
+
 
 	p->x_dot += RT * (acc[0] ) * 9.8;
 	p->y_dot += RT * (acc[1] ) * 9.8;

@@ -8,6 +8,8 @@
 #include "main.h"
 extern f32 Xh,Yh;
 extern accel mag;
+
+
 void vdBodyRatesBlock(parameters* ptr)
 {
 	f32 p_error,q_error,r_error;
@@ -37,7 +39,8 @@ void vdDroneStartBlock(parameters* ptr)
 	do
 	{
 		fview(PRINT_NORMAL, 0, "FOR TARGET X Y Z: INSERT 1 \nFOR TARGET X Y Z VELOCITIES: INSERT 2 \nFOR TARGET PSI: INSERT 3 \nTO RETURN TO PREVIOUS MENU INSERT 0\r\n");
-		string_receive((u8*)buffer);
+//		string_receive((u8*)buffer);
+		HAL_UART_Receive(&huart1, buffer, 2, HAL_MAX_DELAY);
 	}while(atoi(buffer) < 0 || atoi(buffer) > 3);
 	volatile int temp = atoi(buffer);
 
@@ -115,9 +118,9 @@ void vdDroneStartBlock(parameters* ptr)
 void vdMPUBlock(parameters* ptr)
 {
 	/*Read Gyro and Accel values, then comp filter*/
-//	Read_Accel_Values(ptr);
-//	Read_Gyro_Values(ptr,INTEGRAL_DT);
-//	imu_Comp_Filter(ptr,INTEGRAL_DT);
+	Read_Accel_Values(ptr);
+	Read_Gyro_Values(ptr,INTEGRAL_DT);
+	imu_Comp_Filter(ptr,INTEGRAL_DT);
 	Read_Compass_Values(ptr);
 //	fview(PRINT_FLOAT_WITH_TAB, ptr->theta, "THETA = ");
 //	fview(PRINT_FLOAT_WITH_TAB, ptr->phi, "PHI = ");
@@ -149,11 +152,12 @@ void vdOutputBlock(parameters* ptr)
 	/*-----------*/
 	u8 i;
 	f32 speed_pwm[4]={0};
+//	ptr->status.pwm = PWM_ON;
 	for(i=0 ; i<4;i++)
 	{
 		if (ptr->cmd_thrust[i] < F_min) ptr->cmd_thrust[i]=F_min;
 		if (ptr->cmd_thrust[i] > F_max) ptr->cmd_thrust[i]=F_max;
-		PWM(speed_pwm[i],i+1);
+		PWM(ptr->cmd_thrust[i],i+1);
 	}
 }
 
@@ -162,10 +166,10 @@ void vdRollPitchBlock(parameters* ptr)
 	f32 b_x_dot_cmd, b_y_dot_cmd, taw=1/kp_bank;
 	f32 R11 = 1;
 	f32 R12 = sin(ptr->phi *DEG_TO_RAD) * sin(ptr->theta *DEG_TO_RAD) / cos(ptr->theta *DEG_TO_RAD);
-	f32 R13= cos(ptr->phi *DEG_TO_RAD) * sin(ptr->theta *DEG_TO_RAD) / cos(ptr->theta *DEG_TO_RAD);
+	f32 R13 = cos(ptr->phi *DEG_TO_RAD) * sin(ptr->theta *DEG_TO_RAD) / cos(ptr->theta *DEG_TO_RAD);
 	f32 R21 = 0;
 	f32 R22 = cos(ptr->phi*DEG_TO_RAD);
-	f32 R23= -sin(ptr->phi*DEG_TO_RAD);
+	f32 R23 = -sin(ptr->phi*DEG_TO_RAD);
 	f32 R31 = 0;
 	f32 R32 = sin(ptr->phi*DEG_TO_RAD) / cos(ptr->theta*DEG_TO_RAD);
 	f32 R33 = cos(ptr->phi*DEG_TO_RAD) / cos(ptr->theta*DEG_TO_RAD);
@@ -186,15 +190,15 @@ void vdAltitudeBlock(parameters* ptr)
 {
 	f32 R33 = cos(ptr->phi*DEG_TO_RAD)/cos(ptr->theta*DEG_TO_RAD);
 	ptr->z_dot_dot_cmd= kp_z*(ptr->z_cmd- ptr->z) + kd_z*(ptr->z_dot_cmd-ptr->z_dot);
-	ptr->u1 = mass * (ptr->z_dot_dot_cmd - g)/R33;
+	ptr->u1 = mass * (ptr->z_dot_dot_cmd - 1)/R33;
 }
 
 void vdLateralBlock(parameters* ptr)
 {
-	ptr->x_dot_dot_cmd= kp_xy*(ptr->x_cmd- ptr->z) + kd_xy*(ptr->x_dot_cmd-ptr->x_dot);
-	ptr->y_dot_dot_cmd= kp_xy*(ptr->y_cmd- ptr->z) + kd_xy*(ptr->y_dot_cmd-ptr->y_dot);
+	ptr->x_dot_dot_cmd= kp_xy*(ptr->x_cmd- ptr->x) + kd_xy*(ptr->x_dot_cmd-ptr->x_dot);
+	ptr->y_dot_dot_cmd= kp_xy*(ptr->y_cmd- ptr->y) + kd_xy*(ptr->y_dot_cmd-ptr->y_dot);
 }
-void fview(uint8_t type, float argument, char * line)
+void fview(uint8_t type, float argument, char* line)
 {
 	uint8_t buffer[150];
 //	  __HAL_UNLOCK(&huart1);
@@ -225,6 +229,8 @@ void fview(uint8_t type, float argument, char * line)
 void string_receive(u8* buffer)
 {
 	int i = 0;
+//	while ((__HAL_UART_GET_FLAG(&huart1, UART_FLAG_RXNE) ? SET : RESET) == RESET);
+//	osThreadSetPriority(DRONE_STARTHandle, 40);
 	HAL_UART_Receive(&huart1, &buffer[i], 1, HAL_MAX_DELAY);
 	while(buffer[i]!='\n')
 	{
@@ -232,6 +238,7 @@ void string_receive(u8* buffer)
 		HAL_UART_Receive(&huart1, &buffer[i], 1, HAL_MAX_DELAY);
 	}
 	buffer[i] = '\0';
+//	osThreadSetPriority(DRONE_STARTHandle, 32);
 }
 
 void vInitPARAMETERS(parameters *ptr)
@@ -258,7 +265,10 @@ void vInitPARAMETERS(parameters *ptr)
 	ptr->cmd_thrust[3] = 0;
 	ptr->motor1 = ptr->motor2 = ptr->motor3 = ptr->motor4 = 0;
 	ptr->status.pwm = PWM_OFF;
-	ptr-> phib=ptr-> thetab=ptr-> psib=0;
+	ptr->status.busystate = 0;
+	ptr-> phib = ptr-> thetab=0;
+	Read_Compass_Values(ptr);
+	ptr-> psib = ptr-> psi = ptr-> psic;
 }
 
 void vdUserInterface(void)
@@ -274,18 +284,28 @@ u8 u8TestUserInterface(const char* line,parameters* ptr )		/*returns value of wh
 {
 	s8 buffer1[150];
 	s8 buffer[25];
-	sprintf(buffer1,"INSERT TARGET %s (-128 ~ 127), 'return' TO DISPLAY CURRENT MENU OR 'exit' TO GO TO MAIN MENU\n", line);
+	s8 lines[][15] = {{"X"},{"Y"},{"Z"},{"X VELOCITY"},{"Y VELOCITY"},{"Z VELOCITY"},{"PSI"}};
+	u8 select = 0;
+	u8 temp;
+	do
+	{
+		if(strcmp(line,lines[select]) == 0)break;
+		select++;
+	}while(strcmp(line,lines[select]) != 0);
+	sprintf(buffer1,"INSERT TARGET %s (-128 ~ 127), 'r' TO DISPLAY CURRENT MENU OR 'e' TO GO TO MAIN MENU\n", line);
 	insert:
 	fview(PRINT_NORMAL, 0, buffer1);
-	string_receive((u8*)buffer);
-	if (strcmp((char*)buffer,"exit") == 0)
+//	string_receive((u8*)buffer);
+	HAL_UART_Receive(&huart1, buffer, 4, HAL_MAX_DELAY);
+	if (strcmp((char*)buffer,"e") == 0)
 	{
 		do
 			{
 				fview(PRINT_NORMAL, 0, "EXIT?\n 1: YES \t 2: NO\n");
-				string_receive((u8*)buffer);
-			}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-		if(strcmp(buffer, "1") ==0)
+//				string_receive((u8*)buffer);
+				HAL_UART_Receive(&huart1, buffer, 2, HAL_MAX_DELAY);
+			}while(atoi(buffer) != 1 && atoi(buffer) != 2);
+		if(atoi(buffer) == 1)
 			{
 				ptr->ret_flag = 1;
 				return 0;
@@ -295,26 +315,69 @@ u8 u8TestUserInterface(const char* line,parameters* ptr )		/*returns value of wh
 				goto insert;
 			}
 	}
-	else if(strcmp((char*)buffer,"return") == 0)
+	else if(strcmp((char*)buffer,"r") == 0)
 	{
 		do
 			{
 				fview(PRINT_NORMAL, 0, "RETURN?\n 1: YES \t 2: NO\n");
-				string_receive((u8*)buffer);
-			}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-		if(strcmp(buffer, "1") ==0)return 1;
-		if(strcmp(buffer, "2") ==0)goto insert;
+//				string_receive((u8*)buffer);
+				HAL_UART_Receive(&huart1, buffer, 2, HAL_MAX_DELAY);
+			}while(atoi(buffer) != 1 && atoi(buffer) != 2);
+		if(atoi(buffer) == 1)return 1;
+		if(atoi(buffer) == 2)goto insert;
 	}
 	else
 	{
+		temp = atoi(buffer);
 		do
 			{
-				fview(PRINT_INT_NO_TAB, atoi(buffer), "\t");
-				fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
-				string_receive((u8*)buffer);
-			}while(strcmp(buffer,"1") !=0 && strcmp(buffer,"2") !=0);
-		if(strcmp(buffer, "2") ==0)goto insert;
-		if(strcmp(buffer, "1") ==0)ptr->x_cmd = atoi(buffer);
+			fview(PRINT_INT_NO_TAB, temp, "\t");
+			fview(PRINT_NORMAL, 0, "INSERT VALUE?\n 1: YES \t 2: NO\n");
+//				string_receive((u8*)buffer);
+			HAL_UART_Receive(&huart1, buffer, 2, HAL_MAX_DELAY);
+			}while(atoi(buffer)!= 1 && atoi(buffer)!=2);
+		if(atoi(buffer) == 2)goto insert;
+		if(atoi(buffer) == 1)
+		{
+			switch (select)
+			{
+				case 0:
+				{
+					ptr->x_cmd = temp;
+					break;
+				}
+				case 1:
+				{
+					ptr->y_cmd = temp;
+					break;
+				}
+				case 2:
+				{
+					ptr->z_cmd = temp;
+					break;
+				}
+				case 3:
+				{
+					ptr->x_dot_cmd = temp;
+					break;
+				}
+				case 4:
+				{
+					ptr->y_dot_cmd = temp;
+					break;
+				}
+				case 5:
+				{
+					ptr->z_dot_cmd = temp;
+					break;
+				}
+				case 6:
+				{
+					ptr->psi_cmd = temp;
+					break;
+				}
+			}
+		}
 		return 2;
 	}
 	return -1;

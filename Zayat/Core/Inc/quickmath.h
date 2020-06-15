@@ -16,3 +16,4 @@ float determinant(float a[6][6], int k);
 void cofactor(float num[6][6], int f);
 void transpose(float num[6][6], float fac[6][6], int r);
 #endif /* QUICKMATH_H_ */
+

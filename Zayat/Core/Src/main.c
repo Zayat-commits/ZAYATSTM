@@ -43,8 +43,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
 
-TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim1;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
@@ -54,8 +55,8 @@ DMA_HandleTypeDef hdma_usart2_rx;
 osThreadId_t BODY_RATESHandle;
 const osThreadAttr_t BODY_RATES_attributes = {
   .name = "BODY_RATES",
-  .priority = (osPriority_t) osPriorityNormal7,
-  .stack_size = 150 * 4
+  .priority = (osPriority_t) osPriorityAboveNormal,
+  .stack_size = 128 * 4
 };
 /* Definitions for DRONE_START */
 osThreadId_t DRONE_STARTHandle;
@@ -75,21 +76,21 @@ const osThreadAttr_t IMU_attributes = {
 osThreadId_t OUTPUT_THRUSTHandle;
 const osThreadAttr_t OUTPUT_THRUST_attributes = {
   .name = "OUTPUT_THRUST",
-  .priority = (osPriority_t) osPriorityNormal5,
+  .priority = (osPriority_t) osPriorityAboveNormal,
   .stack_size = 128 * 4
 };
 /* Definitions for ROLL_PITCH */
 osThreadId_t ROLL_PITCHHandle;
 const osThreadAttr_t ROLL_PITCH_attributes = {
   .name = "ROLL_PITCH",
-  .priority = (osPriority_t) osPriorityNormal7,
-  .stack_size = 300 * 4
+  .priority = (osPriority_t) osPriorityAboveNormal,
+  .stack_size = 200 * 4
 };
 /* Definitions for YAW */
 osThreadId_t YAWHandle;
 const osThreadAttr_t YAW_attributes = {
   .name = "YAW",
-  .priority = (osPriority_t) osPriorityNormal7,
+  .priority = (osPriority_t) osPriorityAboveNormal,
   .stack_size = 128 * 4
 };
 /* Definitions for ALTITUDE_CONTRO */
@@ -110,8 +111,8 @@ const osThreadAttr_t LATERAL_CONTROL_attributes = {
 osThreadId_t GPSHandle;
 const osThreadAttr_t GPS_attributes = {
   .name = "GPS",
-  .priority = (osPriority_t) osPriorityAboveNormal,
-  .stack_size = 600 * 4
+  .priority = (osPriority_t) osPriorityAboveNormal2,
+  .stack_size = 750 * 4
 };
 /* Definitions for Height */
 osThreadId_t HeightHandle;
@@ -128,10 +129,11 @@ const osThreadAttr_t Height_attributes = {
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
-static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_I2C2_Init(void);
+static void MX_TIM1_Init(void);
 void BodyRate(void *argument);
 void DroneStart(void *argument);
 void MPU(void *argument);
@@ -182,18 +184,19 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
+  MX_I2C2_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-//  vInitPARAMETERS(&parameter);
   HAL_Delay(150);
   BMP_Init();
-//  MPU_Init(p, INTEGRAL_DT);
-//  Compass_Init();
-//  init_EKF();
-//  gps_init();
+  MPU_Init(p, INTEGRAL_DT);
+  Compass_Init();
+  init_EKF();
+  gps_init();
+  vInitPARAMETERS(&parameter);
 
   /* USER CODE END 2 */
 
@@ -218,31 +221,31 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of BODY_RATES */
-//  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
-//
-//  /* creation of DRONE_START */
-  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
-//
-//  /* creation of IMU */
-//  IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
-//
-//  /* creation of OUTPUT_THRUST */
-//  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
-//
-//  /* creation of ROLL_PITCH */
-//  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
-//
-//  /* creation of YAW */
-//  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
-//
-//  /* creation of ALTITUDE_CONTRO */
-//  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
-//
-//  /* creation of LATERAL_CONTROL */
-//  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
-//
-//  /* creation of GPS */
-//  GPSHandle = osThreadNew(GPSmodule, (void*) p, &GPS_attributes);
+  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
+
+  /* creation of DRONE_START */
+//  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
+
+  /* creation of IMU */
+  IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
+
+  /* creation of OUTPUT_THRUST */
+  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
+
+  /* creation of ROLL_PITCH */
+  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
+
+  /* creation of YAW */
+  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
+
+  /* creation of ALTITUDE_CONTRO */
+  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
+
+  /* creation of LATERAL_CONTROL */
+  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+
+  /* creation of GPS */
+  GPSHandle = osThreadNew(GPSmodule, (void*) p, &GPS_attributes);
 
   /* creation of Height */
   HeightHandle = osThreadNew(BMP, (void*) p, &Height_attributes);
@@ -338,73 +341,123 @@ static void MX_I2C1_Init(void)
 }
 
 /**
-  * @brief TIM2 Initialization Function
+  * @brief I2C2 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM2_Init(void)
+static void MX_I2C2_Init(void)
 {
 
-  /* USER CODE BEGIN TIM2_Init 0 */
+  /* USER CODE BEGIN I2C2_Init 0 */
 
-  /* USER CODE END TIM2_Init 0 */
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.ClockSpeed = 100000;
+  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
+
+}
+
+/**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
-  /* USER CODE BEGIN TIM2_Init 1 */
+  /* USER CODE BEGIN TIM1_Init 1 */
 
-  /* USER CODE END TIM2_Init 1 */
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 60;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 24000;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 60;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 24000;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
   {
     Error_Handler();
   }
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
   {
     Error_Handler();
   }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
   sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
-  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
-  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
   }
-  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN TIM2_Init 2 */
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
   sConfigOCZayat = sConfigOC;
-  /* USER CODE END TIM2_Init 2 */
-  HAL_TIM_MspPostInit(&htim2);
+  /* USER CODE END TIM1_Init 2 */
+  HAL_TIM_MspPostInit(&htim1);
 
 }
 
@@ -568,7 +621,7 @@ void BodyRate(void *argument)
 		ptr->u3 = Iyy * ptr->q_dot;
 		ptr->u4 = Izz * ptr->r_dot;*/
 
-		osDelay(10);
+		osDelay(100);
   }
   /* USER CODE END 5 */ 
 }
@@ -588,10 +641,12 @@ void DroneStart(void *argument)
   /* Infinite loop */
 	for(;;)
 	{
+		parameter.status.busystate = 1;
 		do
 		{
 			vdUserInterface();
-			string_receive(buffer);
+//			string_receive(buffer);
+			HAL_UART_Receive(&huart1, buffer, 2, HAL_MAX_DELAY);
 		}while(atoi(buffer) < MODE_0 || atoi(buffer) > MODE_8);
 
 		/*Code gets here upon successful selection of mode*/
@@ -625,7 +680,6 @@ void DroneStart(void *argument)
 	case MODE_5:
 		/*GIVE PRIORITY TO FIRST BLOCK AND LOWER PRIORITY OF THIS FUNTION, NO PWM GENERATED*/
 		parameter.status.pwm = PWM_OFF;
-		DISARM_Motors();
 		vdDroneStartBlock(argument);
 		break;
 	case MODE_6:
@@ -649,14 +703,15 @@ void DroneStart(void *argument)
 		do
 			{
 				fview(PRINT_NORMAL, 0, "PRESS 0 TO GO BACK TO MENU");
-				string_receive(buffer);
+//				string_receive(buffer);
+				HAL_UART_Receive(&huart1, buffer, 2, HAL_MAX_DELAY);
 			}while(atoi(buffer)!=0);
 		parameter.ret_flag = 1;
 		break;
 	case MODE_7:	/*program start*/
 		/*Raspberry configs should be here*/
 		/*Set task priority lower so other tasks can take over*/
-		parameter.status.pwm = PWM_ON;
+//		parameter.status.pwm = PWM_ON;
 		break;
 	case MODE_8:	/*system reset*/
 		HAL_NVIC_SystemReset();
@@ -671,9 +726,10 @@ void DroneStart(void *argument)
 	else
 	{	/*should set task to lower priority*/
 		fview(PRINT_NORMAL, 0, "PRIORITY SET TO NORMAL 5 \n");
-		osThreadSetPriority(DRONE_STARTHandle, osPriorityNormal5);
+		if(osThreadGetPriority(DRONE_STARTHandle) == osPriorityHigh)osThreadSetPriority(DRONE_STARTHandle, osPriorityAboveNormal);
 		fview(PRINT_NORMAL, 0, "DONE \n");
-		osDelay(2000);
+		parameter.status.busystate = 0;
+		osDelay(10000);
 	}
   }
   /* USER CODE END DroneStart */
@@ -699,7 +755,7 @@ void MPU(void *argument)
 
 		/*Calculate total ticks needed for 10 ms period*/
 		tickzayat = osKernelGetTickCount() - tickzayat;
-		tickzayat = 60 - tickzayat;
+		tickzayat = 25 - tickzayat;
 //		if(tickzayat < 0)tickzayat = 10;
 		tickzayat = osKernelGetTickCount() + tickzayat;
 		/*---------------------------------------------*/
@@ -722,7 +778,7 @@ void outputTHRUST(void *argument)
   for(;;)
   {
 	  vdOutputBlock(argument);
-	  osDelay(10);
+	  osDelay(100);
   }
   /* USER CODE END outputTHRUST */
 }
@@ -741,7 +797,7 @@ void RollPitch(void *argument)
   for(;;)
   {
 	  vdRollPitchBlock(argument);
-	  osDelay(20);
+	  osDelay(100);
   }
   /* USER CODE END RollPitch */
 }
@@ -760,7 +816,7 @@ void YawCONTROLLER(void *argument)
   for(;;)
   {
 	  vdYawBlock(argument);
-	  osDelay(10);
+	  osDelay(100);
   }
   /* USER CODE END YawCONTROLLER */
 }
@@ -779,7 +835,7 @@ void Altitude(void *argument)
   for(;;)
   {
 	  vdAltitudeBlock(argument);
-	  osDelay(20);
+	  osDelay(100);
   }
   /* USER CODE END Altitude */
 }
@@ -798,7 +854,7 @@ void lateral(void *argument)
   for(;;)
   {
 	  vdLateralBlock(argument);
-	  osDelay(20);
+	  osDelay(100);
   }
   /* USER CODE END lateral */
 }
@@ -821,8 +877,16 @@ void GPSmodule(void *argument)
 	  tickzayat1 = 0;
 	  tickzayat1 = osKernelGetTickCount();
 	  updatefromGps(argument);
+//	  accel pos,vel;
+//	  Read_gps(&pos, &vel);
+//	  parameter.xgps=pos.x;
+//	  parameter.ygps=pos.y;
+//	  parameter.zgps=pos.z;
+//	  parameter.vxgps=vel.x;
+//	  parameter.vygps=vel.y;
+//	  parameter.vzgps=vel.z;
 	  tickzayat1 = osKernelGetTickCount() - tickzayat1;
-	  tickzayat1 = 100 - tickzayat1;
+	  tickzayat1 = 150 - tickzayat1;
 	  tickzayat1 = tickzayat1 + osKernelGetTickCount();
     osDelayUntil(tickzayat1);
 //	  osDelay(60);
@@ -846,9 +910,19 @@ void BMP(void *argument)
   {
 	  UT();
 	  UP();
-	 parameter.z =  height();
-	 fview(PRINT_FLOAT_NO_TAB, parameter.z, "Z = ");
-    osDelay(50);
+	 parameter.z_baro =  height();
+	 if(ptr->status.busystate == 0)
+	 {
+
+		 fview(PRINT_FLOAT_WITH_TAB, parameter.x, "X =");
+		 fview(PRINT_FLOAT_WITH_TAB, parameter.y, "Y =");
+		 fview(PRINT_FLOAT_WITH_TAB, parameter.z, "Z =");
+		 fview(PRINT_FLOAT_WITH_TAB, parameter.x_dot, "VelX =");
+		 fview(PRINT_FLOAT_WITH_TAB, parameter.y_dot, "VelY =");
+		 fview(PRINT_FLOAT_WITH_TAB, parameter.z_dot, "VelZ =");
+		 fview(PRINT_FLOAT_NO_TAB, parameter.psi, "PSI =");
+	 }
+    osDelay(25);
   }
   /* USER CODE END BMP */
 }
