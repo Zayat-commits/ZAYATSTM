@@ -317,6 +317,7 @@ void imu_Comp_Filter(parameters *p, const f32 RT)
 	p->y_dot_dot = acc[1];
 	p->z_dot_dot = acc[2];
 
-	predict(p);
+
+	//predict(p);
 }
 

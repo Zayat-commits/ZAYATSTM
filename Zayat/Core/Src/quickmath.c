@@ -6,7 +6,7 @@
  */
 #include "main.h"
 extern f32 inverse[6][6];
-int c = 0;
+int v = 0;
 float power(float base, int exp) {
     if(exp < 0) {
         if(base == 0)
@@ -160,16 +160,11 @@ int cofactor(float num[6][6], int f)
         }
       }
      	 x = determinant(b, f - 1);
-     	if (x == 0)
-     		{
-     		x = 0.1;
-     		c = 1;
-     		}
       fac[q][p] = pow(-1, q + p) * x;
     }
   }
 transpose(num, fac, f);
-return c;
+return v;
 }
 
 void transpose(float num[6][6], float fac[6][6], int r)
@@ -185,16 +180,16 @@ void transpose(float num[6][6], float fac[6][6], int r)
         }
     }
   d = determinant(num, r);
-  if (d==0)
+  v = d;
+	  if( d == 0)
 	  {
-	  d = 0.1;
-	  c = 1;
+		  return;
 	  }
   for (i = 0;i < r; i++)
     {
      for (j = 0;j < r; j++)
        {
-        inverse[i][j] = b[i][j] / d;
+        num[i][j] = b[i][j] / d;
         }
     }
 }

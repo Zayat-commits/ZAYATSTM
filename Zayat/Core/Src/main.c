@@ -159,6 +159,7 @@ parameters* p = &parameter;
   * @brief  The application entry point.
   * @retval int
   */
+
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -201,6 +202,7 @@ int main(void)
   /* USER CODE END 2 */
 
   /* Init scheduler */
+
   osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -221,7 +223,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of BODY_RATES */
-  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
+//  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
 
   /* creation of DRONE_START */
 //  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
@@ -230,19 +232,19 @@ int main(void)
   IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
 
   /* creation of OUTPUT_THRUST */
-  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
+//  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
 
   /* creation of ROLL_PITCH */
-  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
+//  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
 
   /* creation of YAW */
-  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
+//  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
 
   /* creation of ALTITUDE_CONTRO */
-  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
+//  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
 
   /* creation of LATERAL_CONTROL */
-  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+//  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
 
   /* creation of GPS */
   GPSHandle = osThreadNew(GPSmodule, (void*) p, &GPS_attributes);
@@ -255,6 +257,8 @@ int main(void)
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
+
+
   osKernelStart();
  
   /* We should never get here as control is now taken by the scheduler */
@@ -876,15 +880,21 @@ void GPSmodule(void *argument)
   {
 	  tickzayat1 = 0;
 	  tickzayat1 = osKernelGetTickCount();
-	  updatefromGps(argument);
-//	  accel pos,vel;
-//	  Read_gps(&pos, &vel);
-//	  parameter.xgps=pos.x;
-//	  parameter.ygps=pos.y;
-//	  parameter.zgps=pos.z;
-//	  parameter.vxgps=vel.x;
-//	  parameter.vygps=vel.y;
-//	  parameter.vzgps=vel.z;
+//	  updatefromGps(argument);
+	  accel pos,vel;
+	  Read_gps(&pos, &vel);
+	  parameter.xgps=pos.x;
+	  parameter.ygps=pos.y;
+	  parameter.zgps=pos.z;
+	  parameter.vxgps=vel.x;
+	  parameter.vygps=vel.y;
+	  parameter.vzgps=vel.z;
+	  parameter.x = 0.9 * parameter.x + 0.03 * parameter.xgps;
+	  parameter.y = 0.9 * parameter.y + 0.03 * parameter.ygps;
+	  parameter.z = 0.9 * parameter.z + 0.03 * parameter.zgps;
+	  parameter.x_dot = 0.9 * parameter.x_dot + 0.01 * parameter.vxgps;
+	  parameter.y_dot = 0.9 * parameter.y_dot + 0.01 * parameter.vygps;
+	  parameter.z_dot = 0.9 * parameter.z_dot + 0.01 * parameter.vzgps;
 	  tickzayat1 = osKernelGetTickCount() - tickzayat1;
 	  tickzayat1 = 150 - tickzayat1;
 	  tickzayat1 = tickzayat1 + osKernelGetTickCount();

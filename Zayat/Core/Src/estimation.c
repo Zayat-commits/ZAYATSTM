@@ -24,26 +24,26 @@ void matrix_multi(int o, int n, int l,f32 mat1[][l],f32 mat2[][n], f32 mat3[][n]
 }
 void init_EKF(void)
 {
-	ekfcov[0][0] = 0.01;;
-	ekfcov[1][1] = 0.01;;
-	ekfcov[2][2] = 0.09;
-	ekfcov[3][3] = 0.01;;
-	ekfcov[4][4] = 0.01;;
+	ekfcov[0][0] = 0.1;
+	ekfcov[1][1] = 0.1;
+	ekfcov[2][2] = 0.9;
+	ekfcov[3][3] = 0.01;
+	ekfcov[4][4] = 0.01;
 	ekfcov[5][5] = 0.09;
-	ekfcov[6][6] = 0.0025;
-	R_GPS[0][0] = 1;
-	R_GPS[1][1] = 1;
-	R_GPS[2][2] = 1; //we'll see
-	R_GPS[3][3] = 0.01;
-	R_GPS[4][4] = 0.01;
-	R_GPS[5][5] = 0.09;
-	Q_load[0][0] = 0.0025 * dt;
-	Q_load[1][1] = 0.0025 * dt;
-	Q_load[2][2] = 0.0025 * dt;
-	Q_load[3][3] = 0.04 * dt;
-	Q_load[4][4] = 0.04 * dt;
-	Q_load[5][5] = 0.01 * dt;
-	Q_load[6][6] = 0.0064 * dt;
+	ekfcov[6][6] = 0.025;
+	R_GPS[0][0] = 0;
+	R_GPS[1][1] = 0;
+	R_GPS[2][2] = 0; //we'll see
+	R_GPS[3][3] = 0;
+	R_GPS[4][4] = 0;
+	R_GPS[5][5] = 0;
+	Q_load[0][0] = 0;
+	Q_load[1][1] = 0;
+	Q_load[2][2] = 0.0 * dt;
+	Q_load[3][3] = 0.0 * dt;
+	Q_load[4][4] = 0.0 * dt;
+	Q_load[5][5] = 0.0 * dt;
+	Q_load[6][6] = 0.0 * dt;
 	R_mag = 0.01;
 	parameter.status.ekf_state = 1;
 }
@@ -97,7 +97,6 @@ void predict(parameters *ptr)
 void updatefromGps(parameters *ptr)
 {
 	predictstate(ptr);
-	predict(ptr);
 	u8 fix;
 	accel *position = &distance;
 	accel *velocity = &speed;
@@ -125,25 +124,16 @@ void updatefromGps(parameters *ptr)
 		for (int i=0;i<6;i++)
 			for (int j=0;j<6;j++)
 				toinvert[i][j] = temp2[i][j] + R_GPS[i][j];
-		int r = cofactor(toinvert, 6);
-		if (r != 1)
+		volatile int r = cofactor(toinvert, 6);
+		if (r >= 0.001)
 		{matrix_multi(7,6,7, ekfcov,hprimegpsT,temp3);
-		for (int i=0;i<7;i++){
-			for (int j=0; j<6;j++){
-				for (int k=0; k<6;k++){
-					sum = sum + temp3[i][k] * inverse[k][j];
-				}
-				K[i][j] = sum;
-				sum = 0;
-			}
-		}
-
+		matrix_multi(7,6,6,temp3,toinvert,K);
 		for(int k=0; k<6; k++)
 			z[k][0] = z[k][0] - zfromX[k];
 		matrix_multi(7,1,6, K,z,temp4);
 		ptr->x += temp4[0][0];
 		ptr->y += temp4[1][0];
-//		ptr->z += temp4[2][0]; ////////////////////////////////////// EXCLUDE Z
+		ptr->z += temp4[2][0]; ////////////////////////////////////// EXCLUDE Z
 		ptr->x_dot += temp4[3][0];
 		ptr->y_dot += temp4[4][0];
 		ptr->z_dot += temp4[5][0];
@@ -154,7 +144,7 @@ void updatefromGps(parameters *ptr)
 				if(i == j)
 					temp5[i][j] = 1 - temp5[i][j];
 				else
-					temp5[i][j] *= -1;
+					temp5[i][j] = 0 - temp5[i][j];
 			}
 		}
 	matrix_multi(7,7,7, temp5,ekfcov, temp6);
@@ -162,6 +152,16 @@ void updatefromGps(parameters *ptr)
 			for (int j=0; j<7;j++)
 				ekfcov[i][j] = temp6[i][j];
 	}
+	else
+		{
+		ekfcov[0][0] = 0.01;
+		ekfcov[1][1] = 0.01;
+		ekfcov[2][2] = 0.09;
+		ekfcov[3][3] = 0.01;
+		ekfcov[4][4] = 0.01;
+		ekfcov[5][5] = 0.09;
+		ekfcov[6][6] = 0.0025;
+		}
 	}
 }
 void updatefromMag(parameters *ptr)
