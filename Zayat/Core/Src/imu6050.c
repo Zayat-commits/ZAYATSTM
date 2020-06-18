@@ -234,6 +234,9 @@ void Read_Gyro_Values(parameters *p, const f32 RT)
 
    p->phib = first_term * p->phib + second_term * accelPhi;
    p->thetab = first_term * p->thetab + second_term * acceltheta;
+   if (p->psib*p->psic <0)
+	   p->psib=p->psic;
+   else
    p->psib = first_term * p->psib + second_term * p->psic;
 
 	if(p->psib > 180.0)
