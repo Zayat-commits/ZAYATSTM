@@ -122,7 +122,7 @@ void vdMPUBlock(parameters* ptr)
 	Read_Gyro_Values(ptr,INTEGRAL_DT);
 	imu_Comp_Filter(ptr,INTEGRAL_DT);
 	Read_Compass_Values(ptr);
-//	predict(ptr);
+	predict(ptr);
 
 //	fview(PRINT_FLOAT_WITH_TAB, ptr->theta, "THETA = ");
 //	fview(PRINT_FLOAT_WITH_TAB, ptr->phi, "PHI = ");

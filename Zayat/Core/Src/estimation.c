@@ -6,7 +6,7 @@
  */
 #include "main.h"
 extern parameters parameter;
-f32 ekfcov[6][6], hprimegps[6][6], hprimegpsT[6][6],  R_GPS[6][6],Q_load[6][6], dt = 0.15,inverse[6][6], toinvert[6][6], K[6][6], gprime[6][6] = {0};
+f32 ekfcov[6][6], hprimegps[6][6], hprimegpsT[6][6],  R_GPS[6][6],Q_load[6][6], dt = 0.015,inverse[6][6], toinvert[6][6], K[6][6], gprime[6][6] = {0};
 f32 z[6][1], zfromX[6];
 accel distance;
 accel speed;
@@ -25,18 +25,24 @@ void matrix_multi(int o, int n, int l,f32 mat1[][l],f32 mat2[][n], f32 mat3[][n]
 void init_EKF(void)
 {
 
-	R_GPS[0][0] = 1;
-	R_GPS[1][1] = 1;
-	R_GPS[2][2] = 1; //we'll see
+	R_GPS[0][0] = 2;
+	R_GPS[1][1] = 2;
+	R_GPS[2][2] = 2; //we'll see
 	R_GPS[3][3] = 0.01;
 	R_GPS[4][4] = 0.01;
-	R_GPS[5][5] = 0.09;
-	Q_load[0][0] = 0.0025 * dt;
-	Q_load[1][1] = 0.0025 * dt;
-	Q_load[2][2] = 0.0025 * dt;
-	Q_load[3][3] = 0.04 * dt;
-	Q_load[4][4] = 0.04 * dt;
+	R_GPS[5][5] = 0.01;
+	Q_load[0][0] = 0.025 * dt;
+	Q_load[1][1] = 0.025 * dt;
+	Q_load[2][2] = 0.025 * dt;
+	Q_load[3][3] = 0.0025 * dt;
+	Q_load[4][4] = 0.0025 * dt;
 	Q_load[5][5] = 0.01 * dt;
+		ekfcov[0][0] = 0.01;
+	    ekfcov[1][1] = 0.01;
+	    ekfcov[2][2] = 0.09;
+	    ekfcov[3][3] = 0.01;
+	    ekfcov[4][4] = 0.01;
+	    ekfcov[5][5] = 0.09;
 	parameter.status.ekf_state = 1;
 }
 void predictstate(parameters *ptr)
@@ -70,7 +76,6 @@ void predict(parameters *ptr)
 void updatefromGps(parameters *ptr)
 {
 	predictstate(ptr);
-	predict(ptr);
 	u8 fix;
 	accel *position = &distance;
 	accel *velocity = &speed;
@@ -99,13 +104,13 @@ void updatefromGps(parameters *ptr)
 		for (int i=0;i<6;i++)
 			for (int j=0;j<6;j++)
 				toinvert[i][j] = temp2[i][j] + R_GPS[i][j];
-		int r = cofactor(toinvert, 6);
-		if (r != 1)
+		volatile f32 r = cofactor(toinvert, 6);
+		if (r != 0)
 		{matrix_multi(6,6,6, ekfcov,hprimegpsT,temp3);
 		for (int i=0;i<6;i++){
 			for (int j=0; j<6;j++){
 				for (int k=0; k<6;k++){
-					sum = sum + temp3[i][k] * inverse[k][j];
+					sum = sum + temp3[i][k] * toinvert[k][j];
 				}
 				K[i][j] = sum;
 				sum = 0;
@@ -117,7 +122,7 @@ void updatefromGps(parameters *ptr)
 		matrix_multi(6,1,6, K,z,temp4);
 		ptr->x += temp4[0][0];
 		ptr->y += temp4[1][0];
-//		ptr->z += temp4[2][0]; ////////////////////////////////////// EXCLUDE Z
+		ptr->z += temp4[2][0]; ////////////////////////////////////// EXCLUDE Z
 		ptr->x_dot += temp4[3][0];
 		ptr->y_dot += temp4[4][0];
 		ptr->z_dot += temp4[5][0];

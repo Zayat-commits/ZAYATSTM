@@ -6,7 +6,7 @@
  */
 #include "main.h"
 extern f32 inverse[6][6];
-int v = 0;
+f32 v = 0;
 float power(float base, int exp) {
     if(exp < 0) {
         if(base == 0)
@@ -132,7 +132,7 @@ float determinant(float a[6][6], int k)
 
     return (det);
 }
-int cofactor(float num[6][6], int f)
+f32 cofactor(float num[6][6], int f)
 {
  float b[6][6], fac[6][6], x;
  int p, q, m, n, i, j;

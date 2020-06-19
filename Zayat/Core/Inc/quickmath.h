@@ -13,7 +13,7 @@
 float power(float base, int exp);
 int fact(int n);
 float determinant(float a[6][6], int k);
-int cofactor(float num[6][6], int f);
+f32 cofactor(float num[6][6], int f);
 void transpose(float num[6][6], float fac[6][6], int r);
 #endif /* QUICKMATH_H_ */
 
