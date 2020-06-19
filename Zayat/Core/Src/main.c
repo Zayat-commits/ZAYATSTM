@@ -896,7 +896,7 @@ void GPSmodule(void *argument)
 //	  parameter.y_dot = 0.9 * parameter.y_dot + 0.01 * parameter.vygps;
 //	  parameter.z_dot = 0.9 * parameter.z_dot + 0.01 * parameter.vzgps;
 	  tickzayat1 = osKernelGetTickCount() - tickzayat1;
-	  tickzayat1 = 150 - tickzayat1;
+	  tickzayat1 = 100 - tickzayat1;
 	  tickzayat1 = tickzayat1 + osKernelGetTickCount();
     osDelayUntil(tickzayat1);
 //	  osDelay(60);

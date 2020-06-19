@@ -5,7 +5,7 @@
  *      Author: Khaled Ali
  */
 #include "main.h"
-extern f32 inverse[6][6];
+extern f32 toinvert[6][12];
 f32 v = 0;
 float power(float base, int exp) {
     if(exp < 0) {
@@ -92,104 +92,66 @@ void Rotate_BtoW_acc(f32 *acc, f32 *q)
 	acc[2] = acc2[2];
 
 }
-float determinant(float a[6][6], int k)
+void matrix_inverse(int order)
 {
-  float s = 1, det = 0, b[6][6];
-  int i, j, m, n, c;
-  if (k == 1)
-    {
-     return (a[0][0]);
-    }
-  else
-    {
-     det = 0;
-     for (c = 0; c < k; c++)
-       {
-        m = 0;
-        n = 0;
-        for (i = 0;i < k; i++)
-          {
-            for (j = 0 ;j < k; j++)
-              {
-                b[i][j] = 0;
-                if (i != 0 && j != c)
-                 {
-                   b[m][n] = a[i][j];
-                   if (n < (k - 2))
-                    n++;
-                   else
-                    {
-                     n = 0;
-                     m++;
-                     }
-                   }
-               }
-             }
-          det = det + s * (a[0][c] * determinant(b, k - 1));
-          s = -1 * s;
-          }
+	int qr,qc;
+for (qr =0;qr<order;qr++)
+{
+	for(qc=order; qc<2*order;qc++)
+	{
+		toinvert[qr][qc]=0;
+	}
+}
+    float temp;
+
+    for (int i = 0; i < order; i++) {
+
+        for (int j = 0; j < 2 * order; j++) {
+
+            // Add '1' at the diagonal places of
+            // the matrix to create a identity matirx
+            if (j == (i + order))
+                toinvert[i][j] = 1;
+        }
     }
 
-    return (det);
-}
-f32 cofactor(float num[6][6], int f)
-{
- float b[6][6], fac[6][6], x;
- int p, q, m, n, i, j;
- for (q = 0;q < f; q++)
- {
-   for (p = 0;p < f; p++)
-    {
-     m = 0;
-     n = 0;
-     for (i = 0;i < f; i++)
-     {
-       for (j = 0;j < f; j++)
-        {
-          if (i != q && j != p)
-          {
-            b[m][n] = num[i][j];
-            if (n < (f - 2))
-             n++;
-            else
-             {
-               n = 0;
-               m++;
-               }
+    // Interchange the row of matrix,
+    // interchanging of row will start from the last row
+  /*  for (int i = order - 1; i > 0; i--) {
+         if (toinvert[i - 1][0] < toinvert[i][0])
+         for (int j = 0; j < 2 * order; j++) {
+
+        	 temp = toinvert[i][j];
+        	 toinvert[i][j] = toinvert[i - 1][j];
+        	 toinvert[i - 1][j] = temp;
+            }
+
+
+    }*/
+
+    for (int i = 0; i < order; i++) {
+
+        for (int j = 0; j < order; j++) {
+
+            if (j != i) {
+
+                temp = toinvert[j][i] / toinvert[i][i];
+                for (int k = 0; k < 2 * order; k++) {
+
+                    toinvert[j][k] -= toinvert[i][k] * temp;
+                }
             }
         }
-      }
-     	 x = determinant(b, f - 1);
-      fac[q][p] = pow(-1, q + p) * x;
     }
-  }
-transpose(num, fac, f);
-return v;
-}
 
-void transpose(float num[6][6], float fac[6][6], int r)
-{
-  int i, j;
-  float b[6][6], d;
+    // Multiply each row by a nonzero integer.
+    // Divide row element by the diagonal element
+    for (int i = 0; i < order; i++) {
 
-  for (i = 0;i < r; i++)
-    {
-     for (j = 0;j < r; j++)
-       {
-         b[i][j] = fac[j][i];
-        }
-    }
-  d = determinant(num, r);
-  v = d;
-	  if( d == 0)
-	  {
-		  return;
-	  }
-  for (i = 0;i < r; i++)
-    {
-     for (j = 0;j < r; j++)
-       {
-        num[i][j] = b[i][j] / d;
+        temp = toinvert[i][i];
+        for (int j = 0; j < 2 * order; j++) {
+
+            toinvert[i][j] = toinvert[i][j] / temp;
         }
     }
 }

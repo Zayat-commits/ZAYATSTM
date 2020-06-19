@@ -12,8 +12,6 @@
 #define TERMS 7
 float power(float base, int exp);
 int fact(int n);
-float determinant(float a[6][6], int k);
-f32 cofactor(float num[6][6], int f);
-void transpose(float num[6][6], float fac[6][6], int r);
+void matrix_inverse(int order);
 #endif /* QUICKMATH_H_ */
 
