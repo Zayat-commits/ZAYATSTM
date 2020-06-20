@@ -30,7 +30,7 @@ void gps_init(void)
 		 HAL_Delay(5);
 	 }
 
-	  HAL_Delay(20000); ////////////////////////////////////////////EDIT THIS//////////////////////////////////////////////////////////////////7
+	  HAL_Delay(2000); ////////////////////////////////////////////EDIT THIS//////////////////////////////////////////////////////////////////7
 	  Read_gps(&gps_position,&gps_velocity);
 	  gps_position_offset.x = gps_position.x; gps_position_offset.y = gps_position.y; gps_position_offset.z = gps_position.z;
 	  parameter.status.gps_state = 1;
@@ -51,7 +51,7 @@ uint8_t Read_gps(accel *position, accel *velocity)
 
 uint8_t flag;
 flag = gps_data[(26+e)%92]; //Gps fix (PASS IT ONE I GET THE VARIABLE)
-//flag = 3; //Gps fix (PASS IT ONE I GET THE VARIABLE)
+flag = 3; //Gps fix (PASS IT ONE I GET THE VARIABLE)
 			position->x = ((((int32_t)(gps_data[(30+e)%92])& 0xFF)) | (((int32_t)(gps_data[(31+e)%92]& 0xFF)) <<8)|(((int32_t)(gps_data[(32+e)%92]& 0xFF))<<16) | (((int32_t)(gps_data[(33+e)%92]& 0xFF))<<24))*111139.0/10000000;
 			position->y = ((((int32_t)(gps_data[(34+e)%92])& 0xFF)) | (((int32_t)(gps_data[(35+e)%92]& 0xFF)) <<8)|(((int32_t)(gps_data[(36+e)%92]& 0xFF))<<16) | (((int32_t)(gps_data[(37+e)%92]& 0xFF))<<24))*111139.0/10000000;
 			position->z = -((((int32_t)(gps_data[(42+e)%92])& 0xFF)) | (((int32_t)(gps_data[(43+e)%92]& 0xFF)) <<8)|(((int32_t)(gps_data[(44+e)%92]& 0xFF))<<16) | (((int32_t)(gps_data[(45+e)%92]& 0xFF))<<24))/1000.0;

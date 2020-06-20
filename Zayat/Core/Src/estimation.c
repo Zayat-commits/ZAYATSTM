@@ -27,7 +27,7 @@ void init_EKF(void)
 
 	R_GPS[0][0] = 2;
 	R_GPS[1][1] = 2;
-	R_GPS[2][2] = 2; //we'll see
+	R_GPS[2][2] = 5; //we'll see
 	R_GPS[3][3] = 0.01;
 	R_GPS[4][4] = 0.01;
 	R_GPS[5][5] = 0.01;
@@ -36,10 +36,10 @@ void init_EKF(void)
 	Q_load[2][2] = 0.025 * dt;
 	Q_load[3][3] = 0.0025 * dt;
 	Q_load[4][4] = 0.0025 * dt;
-	Q_load[5][5] = 0.01 * dt;
+	Q_load[5][5] = 0.0025 * dt;
 		ekfcov[0][0] = 0.01;
 	    ekfcov[1][1] = 0.01;
-	    ekfcov[2][2] = 0.09;
+	    ekfcov[2][2] = 0.01; //here
 	    ekfcov[3][3] = 0.01;
 	    ekfcov[4][4] = 0.01;
 	    ekfcov[5][5] = 0.09;
@@ -84,7 +84,8 @@ void updatefromGps(parameters *ptr)
 	{
 		z[0][0] = position-> x;
 		z[1][0] = position-> y;
-		z[2][0] = position-> z;
+		z[2][0] = ptr-> z_baro;
+//		z[2][0] = position-> z;
 		z[3][0] = velocity-> x;
 		z[4][0] = velocity-> y;
 		z[5][0] = velocity-> z;

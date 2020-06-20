@@ -223,28 +223,28 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of BODY_RATES */
-//  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
+  BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
 
   /* creation of DRONE_START */
-//  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
+  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
 
   /* creation of IMU */
   IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
 
   /* creation of OUTPUT_THRUST */
-//  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
+  OUTPUT_THRUSTHandle = osThreadNew(outputTHRUST, (void*) p, &OUTPUT_THRUST_attributes);
 
   /* creation of ROLL_PITCH */
-//  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
+  ROLL_PITCHHandle = osThreadNew(RollPitch, (void*) p, &ROLL_PITCH_attributes);
 
   /* creation of YAW */
-//  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
+  YAWHandle = osThreadNew(YawCONTROLLER, (void*) p, &YAW_attributes);
 
   /* creation of ALTITUDE_CONTRO */
-//  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
+  ALTITUDE_CONTROHandle = osThreadNew(Altitude, (void*) p, &ALTITUDE_CONTRO_attributes);
 
   /* creation of LATERAL_CONTROL */
-//  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
+  LATERAL_CONTROLHandle = osThreadNew(lateral, (void*) p, &LATERAL_CONTROL_attributes);
 
   /* creation of GPS */
   GPSHandle = osThreadNew(GPSmodule, (void*) p, &GPS_attributes);
@@ -924,13 +924,18 @@ void BMP(void *argument)
 	 if(ptr->status.busystate == 0)
 	 {
 
+//		 fview(PRINT_FLOAT_WITH_TAB, parameter.x_dot, "VelX =");
+//		 fview(PRINT_FLOAT_WITH_TAB, parameter.y_dot, "VelY =");
+//		 fview(PRINT_FLOAT_WITH_TAB, parameter.z_dot, "VelZ =");
+		 fview(PRINT_FLOAT_WITH_TAB, parameter.cmd_thrust[0], "f1=");
+		 fview(PRINT_FLOAT_WITH_TAB, parameter.cmd_thrust[1], "f2=");
+		 fview(PRINT_FLOAT_WITH_TAB, parameter.cmd_thrust[2], "f3=");
+		 fview(PRINT_FLOAT_WITH_TAB, parameter.cmd_thrust[3], "f4=");
 		 fview(PRINT_FLOAT_WITH_TAB, parameter.x, "X =");
 		 fview(PRINT_FLOAT_WITH_TAB, parameter.y, "Y =");
 		 fview(PRINT_FLOAT_WITH_TAB, parameter.z, "Z =");
-		 fview(PRINT_FLOAT_WITH_TAB, parameter.x_dot, "VelX =");
-		 fview(PRINT_FLOAT_WITH_TAB, parameter.y_dot, "VelY =");
-		 fview(PRINT_FLOAT_WITH_TAB, parameter.z_dot, "VelZ =");
-		 fview(PRINT_FLOAT_NO_TAB, parameter.psi, "PSI =");
+
+		 fview(PRINT_FLOAT_NO_TAB, parameter.psi, "psi =");
 	 }
     osDelay(25);
   }
