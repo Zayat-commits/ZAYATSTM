@@ -677,6 +677,7 @@ void DroneStart(void *argument)
 	case MODE_4:
 		/*GIVE PRIORITY TO FIRST BLOCK AND LOWER PRIORITY OF THIS FUNTION*/
 		parameter.status.pwm = PWM_ON;
+		if(parameter.status.armed != 1 && parameter.status.calibrated != 1) fview(PRINT_NORMAL, 0, "MOTORS ARE NOT GOING TO WORK - NO CALIBRATION/ARMING");
 		/*INSERT TARGET COMMANDS*/
 		vdDroneStartBlock(argument);
 		//osThreadSetPriority(DRONE_STARTHandle, osPriorityBelowNormal);

@@ -77,7 +77,7 @@ void PWM(u32 dutyCycle, u8 motorNumber)
 	if(motorNumber == 2)parameter.motor2 = temp;
 	if(motorNumber == 3)parameter.motor3 = temp;
 	if(motorNumber == 4)parameter.motor4 = temp;
-	if(parameter.status.pwm == PWM_ON)
+	if(parameter.status.pwm == PWM_ON && (parameter.status.calibrated == 1 || parameter.status.armed == 1))
 	{
 		sConfigOCZayat.Pulse = temp;
 		switch(motorNumber)
