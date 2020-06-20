@@ -21,8 +21,8 @@
 #define	kp_z		32.0
 #define kd_z		12.0
 #define	kp_yaw		2.0
-#define	kp_p		80.0
-#define	kp_q		80.0
+#define	kp_p		10.0
+#define	kp_q		10.0
 #define kp_r		15.0
 
 #endif /* CONSTANTS_H_ */
