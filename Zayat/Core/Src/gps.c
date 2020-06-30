@@ -52,6 +52,7 @@ uint8_t Read_gps(accel *position, accel *velocity)
 uint8_t flag;
 flag = gps_data[(26+e)%92]; //Gps fix (PASS IT ONE I GET THE VARIABLE)
 flag = 3; //Gps fix (PASS IT ONE I GET THE VARIABLE)
+
 			position->x = ((((int32_t)(gps_data[(30+e)%92])& 0xFF)) | (((int32_t)(gps_data[(31+e)%92]& 0xFF)) <<8)|(((int32_t)(gps_data[(32+e)%92]& 0xFF))<<16) | (((int32_t)(gps_data[(33+e)%92]& 0xFF))<<24))*111139.0/10000000;
 			position->y = ((((int32_t)(gps_data[(34+e)%92])& 0xFF)) | (((int32_t)(gps_data[(35+e)%92]& 0xFF)) <<8)|(((int32_t)(gps_data[(36+e)%92]& 0xFF))<<16) | (((int32_t)(gps_data[(37+e)%92]& 0xFF))<<24))*111139.0/10000000;
 			position->z = -((((int32_t)(gps_data[(42+e)%92])& 0xFF)) | (((int32_t)(gps_data[(43+e)%92]& 0xFF)) <<8)|(((int32_t)(gps_data[(44+e)%92]& 0xFF))<<16) | (((int32_t)(gps_data[(45+e)%92]& 0xFF))<<24))/1000.0;
@@ -61,11 +62,5 @@ flag = 3; //Gps fix (PASS IT ONE I GET THE VARIABLE)
 			position->x -= gps_position_offset.x;
 			position->y -= gps_position_offset.y;
 			position->z -= gps_position_offset.z;
-//			fview(PRINT_FLOAT_WITH_TAB, position->x, "gpspx:");
-//			fview(PRINT_FLOAT_WITH_TAB, position->y, "gpspy:");
-//			fview(PRINT_FLOAT_WITH_TAB, position->z, "gpspz:");
-//			fview(PRINT_FLOAT_WITH_TAB, velocity->x, "gpsvx:");
-//			fview(PRINT_FLOAT_WITH_TAB, velocity->y, "gpsvy:");
-//			fview(PRINT_FLOAT_NO_TAB, velocity->z, "gpsvz:");
 		return flag;
 }

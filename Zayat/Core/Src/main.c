@@ -191,10 +191,13 @@ int main(void)
   MX_I2C2_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
+
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1,1);
   HAL_Delay(150);
   BMP_Init();
   MPU_Init(p, INTEGRAL_DT);
   Compass_Init();
+  Read_Compass_Values(p);
   init_EKF();
   gps_init();
   vInitPARAMETERS(&parameter);
@@ -202,7 +205,6 @@ int main(void)
   /* USER CODE END 2 */
 
   /* Init scheduler */
-
   osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -226,7 +228,7 @@ int main(void)
   BODY_RATESHandle = osThreadNew(BodyRate, (void*) p, &BODY_RATES_attributes);
 
   /* creation of DRONE_START */
-  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
+//  DRONE_STARTHandle = osThreadNew(DroneStart, (void*) p, &DRONE_START_attributes);
 
   /* creation of IMU */
   IMUHandle = osThreadNew(MPU, (void*) p, &IMU_attributes);
@@ -564,6 +566,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
@@ -571,6 +574,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PB15 */
   GPIO_InitStruct.Pin = GPIO_PIN_15;
@@ -640,11 +650,12 @@ void BodyRate(void *argument)
 void DroneStart(void *argument)
 {
   /* USER CODE BEGIN DroneStart */
-	char buffer[10];
+	char buffer[10],delay;
 	parameter.ret_flag = 0;
   /* Infinite loop */
 	for(;;)
 	{
+		delay = 0;
 		parameter.status.busystate = 1;
 		do
 		{
@@ -717,6 +728,7 @@ void DroneStart(void *argument)
 		/*Raspberry configs should be here*/
 		/*Set task priority lower so other tasks can take over*/
 //		parameter.status.pwm = PWM_ON;
+		delay = 1;
 		break;
 	case MODE_8:	/*system reset*/
 		HAL_NVIC_SystemReset();
@@ -734,6 +746,7 @@ void DroneStart(void *argument)
 		if(osThreadGetPriority(DRONE_STARTHandle) == osPriorityHigh)osThreadSetPriority(DRONE_STARTHandle, osPriorityAboveNormal);
 		fview(PRINT_NORMAL, 0, "DONE \n");
 		parameter.status.busystate = 0;
+		if(delay)osDelay(100000);
 		osDelay(10000);
 	}
   }
@@ -882,20 +895,14 @@ void GPSmodule(void *argument)
 	  tickzayat1 = 0;
 	  tickzayat1 = osKernelGetTickCount();
 	  updatefromGps(argument);
-//	  accel pos,vel;
-//	  Read_gps(&pos, &vel);
-//	  parameter.xgps=pos.x;
-//	  parameter.ygps=pos.y;
-//	  parameter.zgps=pos.z;
-//	  parameter.vxgps=vel.x;
-//	  parameter.vygps=vel.y;
-//	  parameter.vzgps=vel.z;
-//	  parameter.x = 0.9 * parameter.x + 0.03 * parameter.xgps;
-//	  parameter.y = 0.9 * parameter.y + 0.03 * parameter.ygps;
-//	  parameter.z = 0.9 * parameter.z + 0.03 * parameter.zgps;
-//	  parameter.x_dot = 0.9 * parameter.x_dot + 0.01 * parameter.vxgps;
-//	  parameter.y_dot = 0.9 * parameter.y_dot + 0.01 * parameter.vygps;
-//	  parameter.z_dot = 0.9 * parameter.z_dot + 0.01 * parameter.vzgps;
+	  accel pos,vel;
+	  Read_gps(&pos, &vel);
+	  parameter.xgps=pos.x;
+	  parameter.ygps=pos.y;
+	  parameter.zgps=pos.z;
+	  parameter.vxgps=vel.x;
+	  parameter.vygps=vel.y;
+	  parameter.vzgps=vel.z;
 	  tickzayat1 = osKernelGetTickCount() - tickzayat1;
 	  tickzayat1 = 100 - tickzayat1;
 	  tickzayat1 = tickzayat1 + osKernelGetTickCount();
@@ -924,19 +931,13 @@ void BMP(void *argument)
 	 parameter.z_baro =  height();
 	 if(ptr->status.busystate == 0)
 	 {
-
-//		 fview(PRINT_FLOAT_WITH_TAB, parameter.x_dot, "VelX =");
-//		 fview(PRINT_FLOAT_WITH_TAB, parameter.y_dot, "VelY =");
-//		 fview(PRINT_FLOAT_WITH_TAB, parameter.z_dot, "VelZ =");
-		 fview(PRINT_FLOAT_WITH_TAB, parameter.cmd_thrust[0], "f1=");
-		 fview(PRINT_FLOAT_WITH_TAB, parameter.cmd_thrust[1], "f2=");
-		 fview(PRINT_FLOAT_WITH_TAB, parameter.cmd_thrust[2], "f3=");
-		 fview(PRINT_FLOAT_WITH_TAB, parameter.cmd_thrust[3], "f4=");
-		 fview(PRINT_FLOAT_WITH_TAB, parameter.x, "X =");
-		 fview(PRINT_FLOAT_WITH_TAB, parameter.y, "Y =");
-		 fview(PRINT_FLOAT_WITH_TAB, parameter.z, "Z =");
-
-		 fview(PRINT_FLOAT_NO_TAB, parameter.psi, "psi =");
+//		 fview(PRINT_FLOAT_WITH_TAB, parameter.cmd_thrust[0], "f1=");
+//		 fview(PRINT_FLOAT_WITH_TAB, parameter.cmd_thrust[1], "f2=");
+//		 fview(PRINT_FLOAT_WITH_TAB, parameter.cmd_thrust[2], "f3=");
+//		 fview(PRINT_FLOAT_WITH_TAB, parameter.cmd_thrust[3], "f4=");
+//		 fview(PRINT_FLOAT_WITH_TAB, parameter.phi, "phi =");
+//		 fview(PRINT_FLOAT_WITH_TAB, parameter.theta, "theta =");
+//		 fview(PRINT_FLOAT_NO_TAB, parameter.psi, "psi =");
 	 }
     osDelay(25);
   }

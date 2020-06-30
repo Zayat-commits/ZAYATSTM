@@ -133,6 +133,12 @@ for (qr =0;qr<order;qr++)
 
         for (int j = 0; j < order; j++) {
 
+        	if (toinvert[i][i]==1) {
+
+        		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,1);
+
+        		break;}
+
             if (j != i) {
 
                 temp = toinvert[j][i] / toinvert[i][i];

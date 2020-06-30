@@ -41,6 +41,7 @@ void ARM_Motors(void)
 		{
 	case 1:
 		parameter.status.pwm = PWM_ON;
+		parameter.status.armed = 1;;
 		PWM(MIN,MOTOR1);
 		PWM(MIN,MOTOR2);
 		PWM(MIN,MOTOR3);
@@ -142,13 +143,14 @@ void vCalibrate_Motors(void)
 			vdFrames("STARS");
 			fview(PRINT_NORMAL, 0, "CALIBRATION IS DONE BY APPLYING 100 % POWER TO MOTORS FOLLOWED BY 0 % SEPARATED BY SPECIFIC TONE (BEEP-BEEP)\n1: YES\t 2: NO \n");
 //			string_receive(buffer);
-			HAL_UART_Receive(&huart1, buffer, 1, HAL_MAX_DELAY);
+			HAL_UART_Receive(&huart1, buffer, 2, HAL_MAX_DELAY);
 		}while(atoi(buffer) != 1 && atoi(buffer) != 2);
 
 
 		if(atoi(buffer) == 1)
 			{
 			parameter.status.pwm = PWM_ON;
+			parameter.status.calibrated = 1;
 			PWM(MAX,MOTOR1);
 			PWM(MAX,MOTOR2);
 			PWM(MAX,MOTOR3);
@@ -157,7 +159,7 @@ void vCalibrate_Motors(void)
 			{
 				fview(PRINT_NORMAL, 0, "PWM = 100, INSERT 0 AFTER FIRST TONE (BEEP-BEEP) OR REPLUG/RESET IN CASE OF NO TONE\n");
 //				string_receive(buffer);
-				HAL_UART_Receive(&huart1, buffer, 1, HAL_MAX_DELAY);
+				HAL_UART_Receive(&huart1, buffer, 2, HAL_MAX_DELAY);
 			}while(atoi(buffer) != 0);
 
 			fview(PRINT_NORMAL, 0, "----------------------------------------------RECEIVED----------------------------------------------------- \n \n");
@@ -169,7 +171,7 @@ void vCalibrate_Motors(void)
 			{
 				fview(PRINT_NORMAL, 0, "PWM = 0, INSERT 0 AFTER SECOND TONE (BEEP-BEEP) OR REPLUG/RESET SYSTEM IN CASE OF NO TONE\n");
 //				string_receive(buffer);
-				HAL_UART_Receive(&huart1, buffer, 1, HAL_MAX_DELAY);
+				HAL_UART_Receive(&huart1, buffer, 2, HAL_MAX_DELAY);
 			}while(atoi(buffer) != 0);
 
 			fview(PRINT_NORMAL, 0, "-------------------------------------RECEIVED AND DONE CALIBRATION----------------------------------------- \n \n");
@@ -206,13 +208,13 @@ void vdFreeRunPWM(void)
 
 		fview(PRINT_NORMAL, 0, "TO RETURN TO PREVIOUS MENU INSERT -1 \nOTHERWISE, THE PWM RANGES FROM 0 ~ 100. \nINSERT HERE: ");
 //		string_receive(buffer);
-		HAL_UART_Receive(&huart1, buffer, 3, HAL_MAX_DELAY);
+		HAL_UART_Receive(&huart1, buffer, 4, HAL_MAX_DELAY);
 
 		while(atoi(buffer) > 100 || atoi(buffer) < -1)
 		{
 			fview(PRINT_NORMAL, 0, "\nINSERT CORRECT NUMBER: ");
 //			string_receive(buffer);
-			HAL_UART_Receive(&huart1, buffer, 3, HAL_MAX_DELAY);
+			HAL_UART_Receive(&huart1, buffer, 4, HAL_MAX_DELAY);
 
 		}
 		if(atoi(buffer) == -1)

@@ -6,7 +6,7 @@
  */
 #include "main.h"
 extern parameters parameter;
-f32 ekfcov[6][6], hprimegps[6][6], hprimegpsT[6][6],  R_GPS[6][6],Q_load[6][6], dt = 0.015, toinvert[6][12], K[6][6], gprime[6][6] = {0};
+f32 ekfcov[6][6], hprimegps[6][6], hprimegpsT[6][6],  R_GPS[6][6],Q_load[6][6], dt = 0.025, toinvert[6][12], K[6][6], gprime[6][6] = {0};
 f32 z[6][1], zfromX[6];
 accel distance;
 accel speed;
@@ -27,7 +27,7 @@ void init_EKF(void)
 
 	R_GPS[0][0] = 2;
 	R_GPS[1][1] = 2;
-	R_GPS[2][2] = 5; //we'll see
+	R_GPS[2][2] = 2;
 	R_GPS[3][3] = 0.01;
 	R_GPS[4][4] = 0.01;
 	R_GPS[5][5] = 0.01;
@@ -37,12 +37,12 @@ void init_EKF(void)
 	Q_load[3][3] = 0.0025 * dt;
 	Q_load[4][4] = 0.0025 * dt;
 	Q_load[5][5] = 0.0025 * dt;
-		ekfcov[0][0] = 0.01;
-	    ekfcov[1][1] = 0.01;
-	    ekfcov[2][2] = 0.01; //here
-	    ekfcov[3][3] = 0.01;
-	    ekfcov[4][4] = 0.01;
-	    ekfcov[5][5] = 0.09;
+	ekfcov[0][0] = 0.01;
+	ekfcov[1][1] = 0.01;
+	ekfcov[2][2] = 0.04;
+	ekfcov[3][3] = 0.01;
+	ekfcov[4][4] = 0.01;
+	ekfcov[5][5] = 0.09;
 	parameter.status.ekf_state = 1;
 }
 void predictstate(parameters *ptr)
@@ -84,29 +84,16 @@ void updatefromGps(parameters *ptr)
 	{
 		z[0][0] = position-> x;
 		z[1][0] = position-> y;
-		z[2][0] = ptr-> z_baro;
-//		z[2][0] = position-> z;
+//		z[2][0] = ptr-> z_baro;
+		z[2][0] = position-> z;
 		z[3][0] = velocity-> x;
 		z[4][0] = velocity-> y;
 		z[5][0] = velocity-> z;
-		for (int i =0; i<6; i++)
-			hprimegps[i][i] = 1;
-		for (int i=0;i<6;i++)
-			for (int j=0;j<6;j++)
-				hprimegpsT[j][i] = hprimegps[i][j];
-		f32 sum=0;
-		f32 temp1[6][6];
-		f32 temp2[6][6];
-		f32 temp3[6][6];
-		f32 temp4[6][1], temp5[6][6], temp6[6][6];
-//		matrix_multi(6,6,6, hprimegps,ekfcov,temp1);
-//		matrix_multi(6,6,6, temp1,hprimegpsT,temp2);
-
+		f32 sum, temp4[6][1], temp6[6][6];
 		for (int i=0;i<6;i++)
 			for (int j=0;j<6;j++)
 				toinvert[i][j] = ekfcov[i][j] + R_GPS[i][j];
 		matrix_inverse(6);
-//		matrix_multi(6,6,6, ekfcov,hprimegpsT,temp3);
 		for (int i=0;i<6;i++){
 			for (int j=0; j<6;j++){
 				for (int k=0; k<6;k++){
@@ -120,13 +107,20 @@ void updatefromGps(parameters *ptr)
 		for(int k=0; k<6; k++)
 			z[k][0] = z[k][0] - zfromX[k];
 		matrix_multi(6,1,6, K,z,temp4);
+if (abs(temp4[0][0])>20 ||abs(temp4[1][0])>20 ||abs(temp4[2][0])>20 ||abs(temp4[3][0])>20 ||abs(temp4[4][0])>20 ||abs(temp4[5][0])>20 )
+	{
+	for(int p=0 ; p<30 ; p++)
+		{fview(PRINT_FLOAT_NO_TAB, parameter.z_dot, "ERROR IN NEW VALUES ");}
+	return;
+	}
+
+
 		ptr->x += temp4[0][0];
 		ptr->y += temp4[1][0];
-		ptr->z += temp4[2][0]; ////////////////////////////////////// EXCLUDE Z
+		ptr->z += temp4[2][0];
 		ptr->x_dot += temp4[3][0];
 		ptr->y_dot += temp4[4][0];
 		ptr->z_dot += temp4[5][0];
-//		matrix_multi(6,6,6, K,hprimegps, temp5);
 		for(int i = 0; i<6; i++){
 			for(int j = 0; j<6;j++)
 			{
@@ -141,6 +135,29 @@ void updatefromGps(parameters *ptr)
 			for (int j=0; j<6;j++)
 				ekfcov[i][j] = temp6[i][j];
 	}
+	else 		 fview(PRINT_FLOAT_NO_TAB, parameter.z_dot, "ERROR NO FIX");
+	 if(ptr->status.busystate == 0)
+	 {
+	 fview(PRINT_FLOAT_WITH_TAB, parameter.x, "X =");
+	 fview(PRINT_FLOAT_WITH_TAB, parameter.y, "Y =");
+	 fview(PRINT_FLOAT_WITH_TAB, parameter.z, "Z =");
+	 fview(PRINT_FLOAT_WITH_TAB, parameter.x_dot, "VelX =");
+	 fview(PRINT_FLOAT_WITH_TAB, parameter.y_dot, "VelY =");
+	 fview(PRINT_FLOAT_WITH_TAB, parameter.z_dot, "VelZ =");
+//	 fview(PRINT_FLOAT_WITH_TAB, parameter.xgps, "GPSX =");
+//	 fview(PRINT_FLOAT_WITH_TAB, parameter.ygps, "GPSY =");
+//	 fview(PRINT_FLOAT_WITH_TAB, parameter.zgps, "GPSZ =");
+//	 fview(PRINT_FLOAT_WITH_TAB, parameter.vxgps, "GPSVX =");
+//	 fview(PRINT_FLOAT_WITH_TAB, parameter.vygps, "GPSVY =");
+//	 fview(PRINT_FLOAT_WITH_TAB, parameter.vzgps, "GPSVZ =");
+//	 fview(PRINT_FLOAT_WITH_TAB, toinvert[0][6], "[6] =");
+//	 fview(PRINT_FLOAT_WITH_TAB, toinvert[1][7], "[7] =");
+//	 fview(PRINT_FLOAT_WITH_TAB, toinvert[2][8], "[8] =");
+//	 fview(PRINT_FLOAT_WITH_TAB, toinvert[3][9], "[9] =");
+//	 fview(PRINT_FLOAT_WITH_TAB, toinvert[4][10], "[10] =");
+	 fview(PRINT_FLOAT_NO_TAB, toinvert[5][11], "[11] =");
+	 }
+
 
 }
 

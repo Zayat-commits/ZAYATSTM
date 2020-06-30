@@ -124,15 +124,6 @@ void vdMPUBlock(parameters* ptr)
 	Read_Compass_Values(ptr);
 	predict(ptr);
 
-//	fview(PRINT_FLOAT_WITH_TAB, ptr->theta, "THETA = ");
-//	fview(PRINT_FLOAT_WITH_TAB, ptr->phi, "PHI = ");
-//	fview(PRINT_FLOAT_NO_TAB, ptr->psi, "PSI = ");
-//	fview(PRINT_FLOAT_WITH_TAB, ptr->x, "X = ");
-//	fview(PRINT_FLOAT_WITH_TAB, ptr->y, "Y = ");
-//	fview(PRINT_FLOAT_WITH_TAB, ptr->z, "Z = ");
-//	fview(PRINT_FLOAT_WITH_TAB, ptr->x_dot, "VX = ");
-//	fview(PRINT_FLOAT_WITH_TAB, ptr->y_dot, "VY = ");
-//	fview(PRINT_FLOAT_NO_TAB, ptr->z_dot, "VZ = ");
 
 
 }
