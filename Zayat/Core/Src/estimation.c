@@ -6,7 +6,7 @@
  */
 #include "main.h"
 extern parameters parameter;
-f32 ekfcov[6][6], hprimegps[6][6], hprimegpsT[6][6],  R_GPS[6][6],Q_load[6][6], dt = 0.025, toinvert[6][12], K[6][6], gprime[6][6] = {0};
+f32 ekfcov[6][6], hprimegps[6][6], hprimegpsT[6][6],  R_GPS[6][6],Q_load[6][6], dt = 0.015, toinvert[6][12], K[6][6], gprime[6][6] ;
 f32 z[6][1], zfromX[6];
 accel distance;
 accel speed;
@@ -25,21 +25,21 @@ void matrix_multi(int o, int n, int l,f32 mat1[][l],f32 mat2[][n], f32 mat3[][n]
 void init_EKF(void)
 {
 
-	R_GPS[0][0] = 2;
-	R_GPS[1][1] = 2;
-	R_GPS[2][2] = 2;
-	R_GPS[3][3] = 0.01;
-	R_GPS[4][4] = 0.01;
-	R_GPS[5][5] = 0.01;
-	Q_load[0][0] = 0.025 * dt;
-	Q_load[1][1] = 0.025 * dt;
-	Q_load[2][2] = 0.025 * dt;
-	Q_load[3][3] = 0.0025 * dt;
-	Q_load[4][4] = 0.0025 * dt;
-	Q_load[5][5] = 0.0025 * dt;
-	ekfcov[0][0] = 0.01;
-	ekfcov[1][1] = 0.01;
-	ekfcov[2][2] = 0.04;
+	R_GPS[0][0] = 5;
+	R_GPS[1][1] = 5;
+	R_GPS[2][2] = 500;
+	R_GPS[3][3] = 0.1;
+	R_GPS[4][4] = 0.1;
+	R_GPS[5][5] = 0.1;
+	Q_load[0][0] = 1 * dt;
+	Q_load[1][1] = 1* dt;
+	Q_load[2][2] = 1* dt;
+	Q_load[3][3] = 0.025 * dt;
+	Q_load[4][4] = 0.025 * dt;
+	Q_load[5][5] = 0.025 * dt;
+	ekfcov[0][0] = 2;
+	ekfcov[1][1] = 2;
+	ekfcov[2][2] = 2;
 	ekfcov[3][3] = 0.01;
 	ekfcov[4][4] = 0.01;
 	ekfcov[5][5] = 0.09;
@@ -84,8 +84,8 @@ void updatefromGps(parameters *ptr)
 	{
 		z[0][0] = position-> x;
 		z[1][0] = position-> y;
-//		z[2][0] = ptr-> z_baro;
-		z[2][0] = position-> z;
+		z[2][0] = ptr-> z_baro;
+//		z[2][0] = position-> z;
 		z[3][0] = velocity-> x;
 		z[4][0] = velocity-> y;
 		z[5][0] = velocity-> z;
@@ -107,9 +107,9 @@ void updatefromGps(parameters *ptr)
 		for(int k=0; k<6; k++)
 			z[k][0] = z[k][0] - zfromX[k];
 		matrix_multi(6,1,6, K,z,temp4);
-if (abs(temp4[0][0])>20 ||abs(temp4[1][0])>20 ||abs(temp4[2][0])>20 ||abs(temp4[3][0])>20 ||abs(temp4[4][0])>20 ||abs(temp4[5][0])>20 )
+if (abs(temp4[0][0])>3 ||abs(temp4[1][0])>3 ||abs(temp4[2][0])>3 ||abs(temp4[3][0])>3 ||abs(temp4[4][0])>3 ||abs(temp4[5][0])>3 )
 	{
-	for(int p=0 ; p<30 ; p++)
+	for(int p=0 ; p<10 ; p++)
 		{fview(PRINT_FLOAT_NO_TAB, parameter.z_dot, "ERROR IN NEW VALUES ");}
 	return;
 	}
@@ -143,19 +143,19 @@ if (abs(temp4[0][0])>20 ||abs(temp4[1][0])>20 ||abs(temp4[2][0])>20 ||abs(temp4[
 	 fview(PRINT_FLOAT_WITH_TAB, parameter.z, "Z =");
 	 fview(PRINT_FLOAT_WITH_TAB, parameter.x_dot, "VelX =");
 	 fview(PRINT_FLOAT_WITH_TAB, parameter.y_dot, "VelY =");
-	 fview(PRINT_FLOAT_WITH_TAB, parameter.z_dot, "VelZ =");
+	 fview(PRINT_FLOAT_NO_TAB, parameter.z_dot, "VelZ =");
 //	 fview(PRINT_FLOAT_WITH_TAB, parameter.xgps, "GPSX =");
 //	 fview(PRINT_FLOAT_WITH_TAB, parameter.ygps, "GPSY =");
 //	 fview(PRINT_FLOAT_WITH_TAB, parameter.zgps, "GPSZ =");
 //	 fview(PRINT_FLOAT_WITH_TAB, parameter.vxgps, "GPSVX =");
 //	 fview(PRINT_FLOAT_WITH_TAB, parameter.vygps, "GPSVY =");
-//	 fview(PRINT_FLOAT_WITH_TAB, parameter.vzgps, "GPSVZ =");
+//	 fview(PRINT_FLOAT_NO_TAB, parameter.vzgps, "GPSVZ =");
 //	 fview(PRINT_FLOAT_WITH_TAB, toinvert[0][6], "[6] =");
 //	 fview(PRINT_FLOAT_WITH_TAB, toinvert[1][7], "[7] =");
 //	 fview(PRINT_FLOAT_WITH_TAB, toinvert[2][8], "[8] =");
 //	 fview(PRINT_FLOAT_WITH_TAB, toinvert[3][9], "[9] =");
 //	 fview(PRINT_FLOAT_WITH_TAB, toinvert[4][10], "[10] =");
-	 fview(PRINT_FLOAT_NO_TAB, toinvert[5][11], "[11] =");
+//	 fview(PRINT_FLOAT_NO_TAB, toinvert[5][11], "[11] =");
 	 }
 
 

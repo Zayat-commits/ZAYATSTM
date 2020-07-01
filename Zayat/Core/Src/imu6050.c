@@ -255,7 +255,6 @@ void imu_Comp_Filter(parameters *p, const f32 RT)
 	f32 second_term;
 	f32 accelPhi;
 	f32 acceltheta;
-	//euler[0] = p->phi; euler[1] = p->theta; euler[2] = p->psi;
 	euler[0]= p->phib;
 	euler[1]= p->thetab;
 	euler[2]= p->psib;
@@ -270,14 +269,13 @@ void imu_Comp_Filter(parameters *p, const f32 RT)
 //----------------------------------------------------------------------------
 
 	f32 acc[3] = {p->x_dot_dot, p->y_dot_dot, p->z_dot_dot};
-	Rotate_BtoW(acc, q); // there was a line to get q but i believe it's already there
+	Rotate_BtoW(acc, q);
 
 
 
 	p->x += RT * p->x_dot;
 	p->y += RT * p->y_dot;
 	p->z += RT * p->z_dot;
-//	p->z = 0.99*p->z +0.01*p->z_baro; ///////////////////////////////////////////////////
 
 
 	p->x_dot += RT * (acc[0] ) * 9.8;

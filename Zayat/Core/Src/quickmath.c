@@ -111,7 +111,7 @@ for (qr =0;qr<order;qr++)
             // Add '1' at the diagonal places of
             // the matrix to create a identity matirx
             if (j == (i + order))
-                toinvert[i][j] = 1;
+                toinvert[i][j] = 1.0;
         }
     }
 

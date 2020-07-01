@@ -70,7 +70,7 @@ osThreadId_t IMUHandle;
 const osThreadAttr_t IMU_attributes = {
   .name = "IMU",
   .priority = (osPriority_t) osPriorityAboveNormal3,
-  .stack_size = 300 * 4
+  .stack_size = 400 * 4
 };
 /* Definitions for OUTPUT_THRUST */
 osThreadId_t OUTPUT_THRUSTHandle;
@@ -112,7 +112,7 @@ osThreadId_t GPSHandle;
 const osThreadAttr_t GPS_attributes = {
   .name = "GPS",
   .priority = (osPriority_t) osPriorityAboveNormal2,
-  .stack_size = 750 * 4
+  .stack_size = 900 * 4
 };
 /* Definitions for Height */
 osThreadId_t HeightHandle;
@@ -192,7 +192,6 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1,1);
   HAL_Delay(150);
   BMP_Init();
   MPU_Init(p, INTEGRAL_DT);
@@ -773,7 +772,7 @@ void MPU(void *argument)
 
 		/*Calculate total ticks needed for 10 ms period*/
 		tickzayat = osKernelGetTickCount() - tickzayat;
-		tickzayat = 25 - tickzayat;
+		tickzayat = 15 - tickzayat;
 //		if(tickzayat < 0)tickzayat = 10;
 		tickzayat = osKernelGetTickCount() + tickzayat;
 		/*---------------------------------------------*/
@@ -853,6 +852,7 @@ void Altitude(void *argument)
   for(;;)
   {
 	  vdAltitudeBlock(argument);
+
 	  osDelay(100);
   }
   /* USER CODE END Altitude */
@@ -939,6 +939,8 @@ void BMP(void *argument)
 //		 fview(PRINT_FLOAT_WITH_TAB, parameter.theta, "theta =");
 //		 fview(PRINT_FLOAT_NO_TAB, parameter.psi, "psi =");
 	 }
+	  volatile u32 NUMBEROFFREEBYTES=uxTaskGetStackHighWaterMark();
+
     osDelay(25);
   }
   /* USER CODE END BMP */

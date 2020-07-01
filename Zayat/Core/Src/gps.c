@@ -30,7 +30,7 @@ void gps_init(void)
 		 HAL_Delay(5);
 	 }
 
-	  HAL_Delay(2000); ////////////////////////////////////////////EDIT THIS//////////////////////////////////////////////////////////////////7
+	  HAL_Delay(1000); ////////////////////////////////////////////EDIT THIS//////////////////////////////////////////////////////////////////7
 	  Read_gps(&gps_position,&gps_velocity);
 	  gps_position_offset.x = gps_position.x; gps_position_offset.y = gps_position.y; gps_position_offset.z = gps_position.z;
 	  parameter.status.gps_state = 1;

@@ -19,7 +19,7 @@ typedef signed long int s32;
 typedef float f32;
 typedef double f64;
 
-#define INTEGRAL_DT 0.025
+#define INTEGRAL_DT 0.015
 
 /*All the parameters needed with a total size of 168 Bytes*/
 typedef struct parameters{
