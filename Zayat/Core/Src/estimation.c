@@ -109,8 +109,7 @@ void updatefromGps(parameters *ptr)
 		matrix_multi(6,1,6, K,z,temp4);
 if (abs(temp4[0][0])>3 ||abs(temp4[1][0])>3 ||abs(temp4[2][0])>3 ||abs(temp4[3][0])>3 ||abs(temp4[4][0])>3 ||abs(temp4[5][0])>3 )
 	{
-	for(int p=0 ; p<10 ; p++)
-		{fview(PRINT_FLOAT_NO_TAB, parameter.z_dot, "ERROR IN NEW VALUES ");}
+		fview(PRINT_FLOAT_NO_TAB, parameter.z_dot, "ERROR IN NEW VALUES ");
 	return;
 	}
 
