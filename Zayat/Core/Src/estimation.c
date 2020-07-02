@@ -33,7 +33,7 @@ void init_EKF(void)
 	R_GPS[5][5] = 0.1;
 	Q_load[0][0] = 1 * dt;
 	Q_load[1][1] = 1* dt;
-	Q_load[2][2] = 1* dt;
+	Q_load[2][2] = 0.1* dt;
 	Q_load[3][3] = 0.025 * dt;
 	Q_load[4][4] = 0.025 * dt;
 	Q_load[5][5] = 0.025 * dt;

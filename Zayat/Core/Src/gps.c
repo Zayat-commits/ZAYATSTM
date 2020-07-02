@@ -62,5 +62,8 @@ flag = 3; //Gps fix (PASS IT ONE I GET THE VARIABLE)
 			position->x -= gps_position_offset.x;
 			position->y -= gps_position_offset.y;
 			position->z -= gps_position_offset.z;
+			position->x = 0;
+			position->y = 0;
+			position->z = 0; ///////////////////////////////////////////////////////////////
 		return flag;
 }

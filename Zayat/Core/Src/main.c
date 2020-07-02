@@ -70,7 +70,7 @@ osThreadId_t IMUHandle;
 const osThreadAttr_t IMU_attributes = {
   .name = "IMU",
   .priority = (osPriority_t) osPriorityAboveNormal3,
-  .stack_size = 400 * 4
+  .stack_size = 300 * 4
 };
 /* Definitions for OUTPUT_THRUST */
 osThreadId_t OUTPUT_THRUSTHandle;
@@ -112,7 +112,7 @@ osThreadId_t GPSHandle;
 const osThreadAttr_t GPS_attributes = {
   .name = "GPS",
   .priority = (osPriority_t) osPriorityAboveNormal2,
-  .stack_size = 900 * 4
+  .stack_size = 1000 * 4
 };
 /* Definitions for Height */
 osThreadId_t HeightHandle;
@@ -773,7 +773,7 @@ void MPU(void *argument)
 		/*Calculate total ticks needed for 10 ms period*/
 		tickzayat = osKernelGetTickCount() - tickzayat;
 		tickzayat = 15 - tickzayat;
-//		if(tickzayat < 0)tickzayat = 10;
+		if(tickzayat < 0)tickzayat = 5;
 		tickzayat = osKernelGetTickCount() + tickzayat;
 		/*---------------------------------------------*/
 		osDelayUntil(tickzayat);
@@ -906,8 +906,8 @@ void GPSmodule(void *argument)
 	  tickzayat1 = osKernelGetTickCount() - tickzayat1;
 	  tickzayat1 = 100 - tickzayat1;
 	  tickzayat1 = tickzayat1 + osKernelGetTickCount();
-    osDelayUntil(tickzayat1);
-//	  osDelay(60);
+//    osDelayUntil(tickzayat1);
+	  osDelay(100);
   }
   /* USER CODE END GPSmodule */
 }
